@@ -37,6 +37,8 @@ import {
   PlusCircle,
   AlertCircle,
   TrendingUp,
+  Shield,
+  Lock,
 } from 'lucide-react';
 
 interface DeepDossierProps {
@@ -158,6 +160,22 @@ export function DeepDossier({
 
   // Form states for Notes Scratchpad
   const [notesScratchpad, setNotesScratchpad] = useState(contact.notes || '');
+
+  // Admin Notes Oversight states
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [localAdminNotes, setLocalAdminNotes] = useState(contact.adminNotes || '');
+
+  useEffect(() => {
+    setLocalAdminNotes(contact.adminNotes || '');
+  }, [contact.id, contact.adminNotes]);
+
+  useEffect(() => {
+    const savedAuthUser = localStorage.getItem('sj_os_authenticated_user');
+    if (savedAuthUser) {
+      const user = JSON.parse(savedAuthUser);
+      setIsAdmin(user.id === 'admin');
+    }
+  }, []);
 
   // Search timeline
   const [timelineSearch, setTimelineSearch] = useState('');
@@ -1567,6 +1585,65 @@ export function DeepDossier({
                 Synchronize Notes Profile
               </button>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* PERSISTENT ADMIN NOTES AREA AT THE BOTTOM (Requirement 4) */}
+      <div className="mt-6 border-t border-gray-150 dark:border-neutral-800 pt-5 space-y-3.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className={`w-4 h-4 ${isAdmin ? 'text-amber-500' : 'text-gray-400'}`} />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              Authorized Administrative Oversight Notes
+            </h3>
+          </div>
+          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+            isAdmin 
+              ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' 
+              : 'bg-gray-100 text-gray-400 border-gray-200'
+          }`}>
+            {isAdmin ? '👑 ADMIN WRITE-ACCESS ACTIVE' : '🔒 READ-ONLY COGNITIVE OVERLAY'}
+          </span>
+        </div>
+
+        <div className="relative">
+          <textarea
+            value={localAdminNotes}
+            onChange={(e) => setLocalAdminNotes(e.target.value)}
+            disabled={!isAdmin}
+            placeholder={isAdmin ? "Type administrative overrides, partner directives, credit authorizations, or general oversight logs here..." : "No administrative directives or overrides registered for this partner."}
+            className={`w-full text-xs font-semibold rounded-xl border p-4.5 focus:outline-hidden h-28 leading-relaxed resize-none ${
+              isAdmin
+                ? 'bg-amber-50/20 focus:bg-white border-amber-200/60 focus:border-amber-400 text-gray-800 dark:text-white placeholder-amber-600/40'
+                : 'bg-gray-50/40 dark:bg-neutral-850/10 border-gray-150 dark:border-neutral-800 text-gray-500 cursor-not-allowed placeholder-gray-400'
+            }`}
+          />
+          {!isAdmin && (
+            <div className="absolute top-2.5 right-2.5 text-[9px] text-gray-400 font-bold flex items-center gap-1 bg-white/80 dark:bg-neutral-900/80 px-1.5 py-0.5 rounded border border-gray-100 dark:border-neutral-800 select-none">
+              <Lock className="w-3 h-3" />
+              Locked
+            </div>
+          )}
+        </div>
+
+        {isAdmin && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent('sj_os_update_contact', {
+                    detail: { id: contact.id, updates: { adminNotes: localAdminNotes } },
+                  })
+                );
+                showToast('Administrative notes successfully synchronized with secure directory.');
+              }}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition active:scale-95"
+            >
+              <Save className="w-4 h-4" />
+              Save Executive Notes
+            </button>
           </div>
         )}
       </div>

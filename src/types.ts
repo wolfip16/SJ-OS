@@ -29,6 +29,7 @@ export interface Contact {
   nextFollowUpDate?: string; // YYYY-MM-DD
   interactionCount: number;
   notes?: string;
+  adminNotes?: string;
   createdAt: string;
 }
 

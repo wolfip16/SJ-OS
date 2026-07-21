@@ -17,6 +17,8 @@ import { ContactsView } from './components/ContactsView';
 import { DailyReviewComponent } from './components/DailyReview';
 import { DynamicInsights } from './components/DynamicInsights';
 import { BackupPortability } from './components/BackupPortability';
+import { AuthLockScreen, ORG_USERS, UserProfile } from './components/AuthLockScreen';
+import { AdminTerminal } from './components/AdminTerminal';
 import {
   Sun,
   Moon,
@@ -28,6 +30,9 @@ import {
   Sparkles,
   HelpCircle,
   FileCheck2,
+  Shield,
+  LogOut,
+  Crown,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -124,25 +129,14 @@ export default function App() {
   // Theme State - Locked to Light Mode (No dark/light theme toggle)
   const darkMode = false;
 
-  // Core OS Database States
-  const [contacts, setContacts] = useState<Contact[]>(() => {
-    const saved = localStorage.getItem('sj_os_contacts');
-    return saved ? JSON.parse(saved) : INITIAL_CONTACTS;
+  // Authenticated and Current Scoped Profile States
+  const [authenticatedUser, setAuthenticatedUser] = useState<UserProfile | null>(() => {
+    const saved = localStorage.getItem('sj_os_authenticated_user');
+    return saved ? JSON.parse(saved) : null;
   });
-
-  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>(() => {
-    const saved = localStorage.getItem('sj_os_timeline');
-    return saved ? JSON.parse(saved) : INITIAL_TIMELINE_EVENTS;
-  });
-
-  const [calendarItems, setCalendarItems] = useState<CalendarItem[]>(() => {
-    const saved = localStorage.getItem('sj_os_calendar');
-    return saved ? JSON.parse(saved) : INITIAL_CALENDAR_ITEMS;
-  });
-
-  const [dailyReviews, setDailyReviews] = useState<DailyReview[]>(() => {
-    const saved = localStorage.getItem('sj_os_reviews');
-    return saved ? JSON.parse(saved) : [];
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    const saved = localStorage.getItem('sj_os_current_user');
+    return saved ? JSON.parse(saved) : null;
   });
 
   // UX States
@@ -150,34 +144,97 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState<string>('2026-07-21'); // Today is set to July 21, 2026
   const [showHelp, setShowHelp] = useState(false);
   const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<'calendar' | 'contacts'>('calendar');
-  const [activePage, setActivePage] = useState<'master' | 'calendar' | 'contacts' | 'history'>('master');
-  
-  // Master persistent Notes Area state (Apple Notes style)
-  const [masterNotes, setMasterNotes] = useState<string>(() => {
-    const saved = localStorage.getItem('sj_os_master_notes');
-    return saved || "✍️ Executive Scratchpad & Sticky Notes\n- Feel free to scribble, draft replies, or plan agendas here.\n- Auto-saved on every keystroke, fully offline-first!\n\n💡 Current Action Plan:\n- Review Phase 2 Elevation blueprint with client.\n- Verify dispatched cladding material receipt.";
-  });
+  const [activePage, setActivePage] = useState<'master' | 'calendar' | 'contacts' | 'history' | 'admin-deck'>('master');
+  const [dismissedSuggestionIds, setDismissedSuggestionIds] = useState<string[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Core OS Database States (scoped to currentUser)
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
+  const [dailyReviews, setDailyReviews] = useState<DailyReview[]>([]);
+  const [masterNotes, setMasterNotes] = useState<string>('');
+
+  // Toast helper
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Keep authenticatedUser and currentUser synced to local storage
+  useEffect(() => {
+    if (authenticatedUser) {
+      localStorage.setItem('sj_os_authenticated_user', JSON.stringify(authenticatedUser));
+    } else {
+      localStorage.removeItem('sj_os_authenticated_user');
+    }
+  }, [authenticatedUser]);
 
   useEffect(() => {
-    localStorage.setItem('sj_os_master_notes', masterNotes);
-  }, [masterNotes]);
+    if (currentUser) {
+      localStorage.setItem('sj_os_current_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('sj_os_current_user');
+    }
+  }, [currentUser]);
 
-  // Sync state to LocalStorage
+  // Load user-specific data dynamically when current scoped profile changes
   useEffect(() => {
-    localStorage.setItem('sj_os_contacts', JSON.stringify(contacts));
-  }, [contacts]);
+    if (!currentUser) return;
+    const uid = currentUser.id;
+
+    const savedContacts = localStorage.getItem(`sj_os_${uid}_contacts`);
+    setContacts(savedContacts ? JSON.parse(savedContacts) : JSON.parse(JSON.stringify(INITIAL_CONTACTS)));
+
+    const savedTimeline = localStorage.getItem(`sj_os_${uid}_timeline`);
+    setTimelineEvents(savedTimeline ? JSON.parse(savedTimeline) : JSON.parse(JSON.stringify(INITIAL_TIMELINE_EVENTS)));
+
+    const savedCalendar = localStorage.getItem(`sj_os_${uid}_calendar`);
+    setCalendarItems(savedCalendar ? JSON.parse(savedCalendar) : JSON.parse(JSON.stringify(INITIAL_CALENDAR_ITEMS)));
+
+    const savedReviews = localStorage.getItem(`sj_os_${uid}_reviews`);
+    setDailyReviews(savedReviews ? JSON.parse(savedReviews) : []);
+
+    const savedNotes = localStorage.getItem(`sj_os_${uid}_master_notes`);
+    setMasterNotes(savedNotes || `✍️ ${currentUser.name} Executive Yellow Pad\n- Scribble client requests, layout specifications, or shipping reference numbers here.\n- Syncs automatically in real-time.\n\n💡 Pipeline Priorities:\n- Complete planned follow-ups.\n- Standardize Material drawings.`);
+    
+    // Reset dismissed suggestions on user change
+    setDismissedSuggestionIds([]);
+    
+    // Select default contact safely
+    const contactsList = savedContacts ? JSON.parse(savedContacts) : INITIAL_CONTACTS;
+    if (contactsList.length > 0) {
+      setSelectedContactId(contactsList[0].id);
+    } else {
+      setSelectedContactId(null);
+    }
+  }, [currentUser]);
+
+  // Save changes dynamically to LocalStorage for current scoped profile
+  useEffect(() => {
+    if (!currentUser) return;
+    localStorage.setItem(`sj_os_${currentUser.id}_contacts`, JSON.stringify(contacts));
+  }, [contacts, currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('sj_os_timeline', JSON.stringify(timelineEvents));
-  }, [timelineEvents]);
+    if (!currentUser) return;
+    localStorage.setItem(`sj_os_${currentUser.id}_timeline`, JSON.stringify(timelineEvents));
+  }, [timelineEvents, currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('sj_os_calendar', JSON.stringify(calendarItems));
-  }, [calendarItems]);
+    if (!currentUser) return;
+    localStorage.setItem(`sj_os_${currentUser.id}_calendar`, JSON.stringify(calendarItems));
+  }, [calendarItems, currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('sj_os_reviews', JSON.stringify(dailyReviews));
-  }, [dailyReviews]);
+    if (!currentUser) return;
+    localStorage.setItem(`sj_os_${currentUser.id}_reviews`, JSON.stringify(dailyReviews));
+  }, [dailyReviews, currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    localStorage.setItem(`sj_os_${currentUser.id}_master_notes`, masterNotes);
+  }, [masterNotes, currentUser]);
 
   // Listen for custom subcomponent fast event triggers
   useEffect(() => {
@@ -282,7 +339,8 @@ export default function App() {
   const totalTodayCount = calendarItems.filter((item) => item.date === '2026-07-21').length;
 
   // Generate real-time insights
-  const currentSuggestions = generateSuggestions(contacts, calendarItems, '2026-07-21');
+  const currentSuggestions = generateSuggestions(contacts, calendarItems, '2026-07-21')
+    .filter((s) => !dismissedSuggestionIds.includes(s.id));
 
   // Trigger Automatic Follow-up Cascades upon finishing a Calendar Task
   const handleToggleComplete = (id: string) => {
@@ -620,8 +678,7 @@ export default function App() {
   };
 
   const handleDismissSuggestion = (id: string) => {
-    // We can filter out or mark as dismissed
-    // For local ease, we can just hide it
+    setDismissedSuggestionIds((prev) => [...prev, id]);
   };
 
   // End of Day Review Conclude callback
@@ -739,11 +796,51 @@ export default function App() {
     setSelectedContactId(null);
   };
 
+  if (!authenticatedUser) {
+    return (
+      <AuthLockScreen
+        onAuthenticate={(user) => {
+          setAuthenticatedUser(user);
+          setCurrentUser(user);
+          if (user.id === 'admin') {
+            setActivePage('admin-deck');
+          } else {
+            setActivePage('master');
+          }
+        }}
+      />
+    );
+  }
+
+  const isImpersonating = authenticatedUser.id === 'admin' && currentUser?.id !== 'admin';
+
   return (
-    <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#000000] text-[#1D1D1F] dark:text-[#F5F5F7] font-sans antialiased transition-colors duration-250">
+    <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#000000] text-[#1D1D1F] dark:text-[#F5F5F7] font-sans antialiased transition-colors duration-250 selection:bg-[#007AFF]/10">
+      {/* 0. Impersonation Banner for Admins */}
+      {isImpersonating && (
+        <div className="bg-[#FF9500] text-white px-5 py-2.5 text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-md relative z-50">
+          <div className="flex items-center gap-2">
+            <Crown className="w-4.5 h-4.5 text-white animate-bounce" />
+            <span>
+              👑 Authorized administrative oversight: Viewing <strong className="underline">{currentUser?.name}</strong>'s workspace. All edits auto-save directly to their profile.
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setCurrentUser(authenticatedUser);
+              setActivePage('admin-deck');
+              showToast('Returned safely to Command Deck.');
+            }}
+            className="px-3.5 py-1.5 bg-white hover:bg-gray-100 text-[#1D1D1F] font-extrabold text-[10px] rounded-lg cursor-pointer transition shadow-xs uppercase tracking-wider"
+          >
+            ← Exit View & Return to Admin Deck
+          </button>
+        </div>
+      )}
+
       {/* 1. Dynamic Header Navigation (Apple-style Translucent Navigation Bar) */}
       <header className="border-b border-[#E5E5EA] bg-[#FFFFFF]/80 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-5 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             {/* Native squircle app icon layout */}
             <div className="bg-[#007AFF] text-white rounded-xl h-9 w-9 font-bold text-sm tracking-tight shadow-sm flex items-center justify-center relative overflow-hidden">
@@ -753,7 +850,7 @@ export default function App() {
             <div>
               <h1 className="text-sm font-semibold tracking-tight text-[#1D1D1F] leading-none flex items-center gap-1.5">
                 SJ OS 
-                <span className="text-[10px] text-[#007AFF] font-medium px-1.5 py-0.5 rounded-md bg-[#007AFF]/10">v1.2</span>
+                <span className="text-[10px] text-[#007AFF] font-medium px-1.5 py-0.5 rounded-md bg-[#007AFF]/10">ORGANIZATION v1.3</span>
               </h1>
               <p className="text-[10px] text-[#8E8E93] font-medium uppercase tracking-wider mt-0.5">
                 Executive Work Operating System
@@ -762,7 +859,20 @@ export default function App() {
           </div>
 
           {/* PAGE NAVIGATION SEGMENTS (Separate pages, keeping current as master sheet) */}
-          <div className="flex items-center bg-[#F2F2F7] p-0.5 rounded-xl border border-[#E5E5EA]">
+          <div className="flex flex-wrap items-center justify-center bg-[#F2F2F7] p-0.5 rounded-xl border border-[#E5E5EA] gap-0.5">
+            {authenticatedUser.id === 'admin' && (
+              <button
+                onClick={() => setActivePage('admin-deck')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                  activePage === 'admin-deck'
+                    ? 'bg-[#007AFF] text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)] font-extrabold'
+                    : 'text-[#8E8E93] hover:text-[#1D1D1F]'
+                }`}
+              >
+                <Crown className="w-3.5 h-3.5" />
+                Admin Command Deck
+              </button>
+            )}
             <button
               onClick={() => setActivePage('master')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
@@ -817,7 +927,7 @@ export default function App() {
               <Sparkles className="w-3.5 h-3.5 text-[#FF9500]" />
               Build My Week
             </button>
-
+ 
             <BackupPortability
               contacts={contacts}
               calendarItems={calendarItems}
@@ -834,6 +944,29 @@ export default function App() {
             >
               <HelpCircle className="w-4.5 h-4.5" />
             </button>
+
+            {/* User Profile Indicator & Logout */}
+            <div className="flex items-center gap-2 border-l border-[#E5E5EA] pl-3.5 ml-1">
+              <div className={`h-8.5 w-8.5 rounded-xl bg-linear-to-br ${currentUser?.color} text-white font-bold text-xs flex items-center justify-center relative overflow-hidden shrink-0 shadow-xs`}>
+                {currentUser?.initials}
+                <div className="absolute inset-0 bg-linear-to-b from-white/10 to-transparent pointer-events-none" />
+              </div>
+              <div className="hidden lg:block text-left">
+                <span className="block text-[10px] font-extrabold text-[#1D1D1F] leading-tight truncate max-w-[100px]">{currentUser?.name}</span>
+                <span className="block text-[8px] text-[#8E8E93] font-bold uppercase tracking-wider">{currentUser?.id === 'admin' ? 'Director' : 'Staff'}</span>
+              </div>
+              <button
+                onClick={() => {
+                  setAuthenticatedUser(null);
+                  setCurrentUser(null);
+                }}
+                className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 cursor-pointer transition active:scale-90"
+                title="Lock Session / Sign Out"
+                id="btn_logout_lock"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -1076,6 +1209,18 @@ export default function App() {
           </div>
         )}
 
+        {activePage === 'admin-deck' && authenticatedUser.id === 'admin' && (
+          <AdminTerminal
+            onImpersonate={(user) => {
+              setCurrentUser(user);
+              showToast(`Switched workspace sandbox view to ${user.name}.`);
+            }}
+            onToast={(msg) => {
+              showToast(msg);
+            }}
+          />
+        )}
+
         {/* 4. Bottom Row: End of Day Realignment & Persistent Notes Area */}
         <footer className="border-t border-[#E5E5EA] pt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Alignment Desk */}
@@ -1114,6 +1259,16 @@ export default function App() {
           </div>
         </footer>
       </main>
+
+      {/* Dynamic Toast notification for app-wide feedback */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#1C1C1E]/95 dark:bg-[#F5F5F7]/95 text-white dark:text-[#1D1D1F] backdrop-blur-md px-4.5 py-3 rounded-xl shadow-xl flex items-center gap-2.5 border border-[#2C2C2E]/50 dark:border-white/20 text-xs font-bold transition-all max-w-sm">
+          <div className="bg-[#007AFF] text-white p-1 rounded-md">
+            <Shield className="w-3.5 h-3.5" />
+          </div>
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -23,41 +23,41 @@ export function DynamicInsights({
   if (activeSuggestions.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-neutral-900 border border-gray-150 dark:border-neutral-800 rounded-2xl shadow-xs overflow-hidden">
-      <div className="px-4.5 py-3 border-b border-gray-150 dark:border-neutral-800 flex items-center justify-between">
+    <div className="bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E5E5EA] dark:border-[#2C2C2E] rounded-2xl shadow-xs overflow-hidden">
+      <div className="px-4.5 py-3 border-b border-[#F2F2F7] dark:border-[#2C2C2E] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4.5 h-4.5 text-amber-500 fill-amber-500/10" />
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-neutral-200">
+          <Sparkles className="w-4.5 h-4.5 text-[#FF9500] fill-[#FF9500]/10" />
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#1D1D1F] dark:text-[#FFFFFF]">
             SJ Dynamic Pipeline Optimizer
           </h2>
         </div>
-        <span className="text-[10px] text-gray-400 dark:text-neutral-500 font-bold uppercase tracking-widest">
+        <span className="text-[10px] text-[#8E8E93] font-medium uppercase tracking-wider">
           Active Recommendations ({activeSuggestions.length})
         </span>
       </div>
 
-      <div className="divide-y divide-gray-100 dark:divide-neutral-800">
+      <div className="divide-y divide-[#F2F2F7] dark:divide-[#2C2C2E]">
         {activeSuggestions.map((suggestion) => {
           // Choose styling based on suggestion type
-          let bgClass = 'bg-white dark:bg-neutral-900';
-          let icon = <Lightbulb className="w-4 h-4 text-amber-500" />;
+          let bgClass = 'bg-white dark:bg-[#1C1C1E]';
+          let icon = <Lightbulb className="w-4.5 h-4.5 text-[#FF9500]" />;
 
           switch (suggestion.type) {
             case 'warning':
-              bgClass = 'bg-red-50/20 dark:bg-red-950/5';
-              icon = <ShieldAlert className="w-4.5 h-4.5 text-red-500" />;
+              bgClass = 'bg-[#FF3B30]/5 dark:bg-[#FF3B30]/10';
+              icon = <ShieldAlert className="w-4.5 h-4.5 text-[#FF3B30]" />;
               break;
             case 'action':
-              bgClass = 'bg-blue-50/20 dark:bg-blue-950/5';
-              icon = <AlertCircle className="w-4.5 h-4.5 text-blue-500" />;
+              bgClass = 'bg-[#007AFF]/5 dark:bg-[#007AFF]/10';
+              icon = <AlertCircle className="w-4.5 h-4.5 text-[#007AFF]" />;
               break;
             case 'success':
-              bgClass = 'bg-emerald-50/20 dark:bg-emerald-950/5';
-              icon = <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500" />;
+              bgClass = 'bg-[#34C759]/5 dark:bg-[#34C759]/10';
+              icon = <CheckCircle2 className="w-4.5 h-4.5 text-[#34C759]" />;
               break;
             default:
-              bgClass = 'bg-gray-50/20 dark:bg-neutral-850/5';
-              icon = <Lightbulb className="w-4.5 h-4.5 text-orange-500" />;
+              bgClass = 'bg-gray-55/5 dark:bg-neutral-850/5';
+              icon = <Lightbulb className="w-4.5 h-4.5 text-[#FF9500]" />;
           }
 
           return (
@@ -69,10 +69,10 @@ export function DynamicInsights({
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 shrink-0">{icon}</div>
                 <div>
-                  <p className="text-xs font-semibold text-gray-800 dark:text-neutral-200 leading-relaxed">
+                  <p className="text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7] leading-relaxed">
                     {suggestion.message}
                   </p>
-                  <p className="text-[10px] text-gray-400 dark:text-neutral-500 font-medium mt-0.5">
+                  <p className="text-[10px] text-[#8E8E93] font-medium mt-0.5">
                     SJ Decision Engine suggested action based on real-time pipeline status
                   </p>
                 </div>
@@ -83,7 +83,7 @@ export function DynamicInsights({
                   {suggestion.actionType !== 'dismiss' && (
                     <button
                       onClick={() => onTriggerAction(suggestion)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-900 hover:bg-black dark:bg-neutral-800 dark:hover:bg-neutral-700 text-white font-bold text-xs tracking-tight transition active:scale-95"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#007AFF] hover:bg-[#0066CC] text-white font-medium text-xs tracking-tight transition-all active:scale-95 cursor-pointer"
                       id={`btn_action_${suggestion.id}`}
                     >
                       <span>{suggestion.actionLabel}</span>
@@ -92,7 +92,7 @@ export function DynamicInsights({
                   )}
                   <button
                     onClick={() => onDismissSuggestion(suggestion.id)}
-                    className="px-2.5 py-1.5 rounded-xl bg-transparent hover:bg-gray-100 dark:hover:bg-neutral-850 text-gray-400 hover:text-gray-600 dark:hover:text-neutral-300 font-bold text-xs transition"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-[#1D1D1F] dark:text-white font-medium text-xs transition-all cursor-pointer active:scale-95"
                     id={`btn_dismiss_${suggestion.id}`}
                   >
                     Dismiss

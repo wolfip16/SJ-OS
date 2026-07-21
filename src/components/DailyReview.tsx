@@ -51,10 +51,10 @@ export function DailyReviewComponent({
       {reviewsHistory.length > 0 && (
         <button
           onClick={() => setShowHistory(!showHistory)}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-extrabold bg-[#F5F5F7] hover:bg-gray-100 dark:bg-neutral-800 dark:hover:bg-neutral-750 text-gray-700 dark:text-neutral-200 border border-gray-200/60 dark:border-neutral-700 transition"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-[#1D1D1F] dark:text-[#F5F5F7] border border-transparent transition cursor-pointer"
           id="btn_history_reviews"
         >
-          <History className="w-4 h-4 text-gray-500" />
+          <History className="w-4 h-4 text-[#8E8E93]" />
           <span>Past Daily Logs ({reviewsHistory.length})</span>
         </button>
       )}
@@ -62,7 +62,7 @@ export function DailyReviewComponent({
       {/* Main End of Day Review Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold bg-amber-500 hover:bg-amber-600 text-white shadow-md active:scale-95 transition"
+        className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-xs active:scale-95 transition cursor-pointer"
         id="btn_open_daily_review"
       >
         <ClipboardCheck className="w-4 h-4" />
@@ -72,18 +72,18 @@ export function DailyReviewComponent({
       {/* Modal Dialog for EOD review */}
       {isOpen && (
         <>
-          <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-xs z-50" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-md z-50" onClick={() => setIsOpen(false)} />
           <div
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-neutral-850 rounded-2xl shadow-2xl p-5 z-50 text-xs animate-scaleUp overflow-y-auto max-h-[90vh]"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white dark:bg-[#1C1C1E] border border-[#E5E5EA] dark:border-[#2C2C2E] rounded-2xl shadow-2xl p-5 z-50 text-xs animate-scaleUp overflow-y-auto max-h-[90vh]"
             id="daily_review_modal"
           >
-            <div className="flex items-center justify-between pb-3.5 border-b border-gray-150 dark:border-neutral-800">
+            <div className="flex items-center justify-between pb-3.5 border-b border-[#F2F2F7] dark:border-[#2C2C2E]">
               <div>
-                <h3 className="font-extrabold text-sm dark:text-white flex items-center gap-1.5">
-                  <Sparkles className="w-4.5 h-4.5 text-amber-500" />
+                <h3 className="font-semibold text-sm text-[#1D1D1F] dark:text-[#FFFFFF] flex items-center gap-1.5">
+                  <Sparkles className="w-4.5 h-4.5 text-[#FF9500]" />
                   SJ OS: Conclude Alignment Desk
                 </h3>
-                <p className="text-[10px] text-gray-400 dark:text-neutral-500 font-bold uppercase tracking-wider mt-0.5">
+                <p className="text-[10px] text-[#8E8E93] font-medium uppercase tracking-wider mt-0.5">
                   Automate pipeline clean-up for July 21, 2026
                 </p>
               </div>
@@ -163,17 +163,17 @@ export function DailyReviewComponent({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-150 dark:border-neutral-800">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#F2F2F7] dark:border-[#2C2C2E]">
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-3.5 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-100 rounded-xl"
+                  className="px-3.5 py-1.5 text-xs font-medium text-[#8E8E93] hover:bg-[#F2F2F7] dark:hover:bg-[#2C2C2E] rounded-lg transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-md"
+                  className="px-4 py-1.5 bg-[#007AFF] hover:bg-[#0066CC] text-white font-semibold text-xs rounded-lg shadow-xs transition-all cursor-pointer active:scale-95"
                 >
                   Conclude & Shift Overdue Tasks
                 </button>

@@ -31,12 +31,98 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+interface HistoryReviewCardProps {
+  key?: string | number;
+  review: DailyReview;
+  onDelete: (id: string) => void;
+  onSave: (id: string, updated: Partial<DailyReview>) => void;
+}
+
+function HistoryReviewCard({ review, onDelete, onSave }: HistoryReviewCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [wins, setWins] = useState(review.wins);
+  const [blockers, setBlockers] = useState(review.blockers);
+  const [unfinishedNotes, setUnfinishedNotes] = useState(review.unfinishedNotes);
+  const [tomorrowPriorities, setTomorrowPriorities] = useState(review.tomorrowPriorities);
+
+  const handleSave = () => {
+    onSave(review.id, { wins, blockers, unfinishedNotes, tomorrowPriorities });
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="p-4 bg-white rounded-xl border border-[#E5E5EA] space-y-3 shadow-xs">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+        <span className="text-xs font-bold text-[#007AFF] font-mono">Daily Realignment Log • {review.date}</span>
+        <div className="flex items-center gap-2">
+          {isEditing ? (
+            <div className="flex gap-1.5">
+              <button onClick={handleSave} className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 cursor-pointer">
+                Save
+              </button>
+              <button onClick={() => setIsEditing(false)} className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-200 cursor-pointer">
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <button onClick={() => setIsEditing(true)} className="text-[10px] font-bold text-gray-600 hover:text-[#007AFF] cursor-pointer">
+                ✏️ Edit
+              </button>
+              <button onClick={() => onDelete(review.id)} className="text-[10px] font-bold text-red-500 hover:text-red-700 cursor-pointer">
+                🗑️ Delete
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {isEditing ? (
+        <div className="space-y-2 text-xs">
+          <div>
+            <label className="block text-[9px] uppercase tracking-wider text-gray-400 font-bold mb-0.5">Wins & Breakthroughs</label>
+            <input type="text" value={wins} onChange={(e) => setWins(e.target.value)} className="w-full p-1.5 border border-gray-200 rounded text-xs" />
+          </div>
+          <div>
+            <label className="block text-[9px] uppercase tracking-wider text-gray-400 font-bold mb-0.5">Blockers & Roadblocks</label>
+            <input type="text" value={blockers} onChange={(e) => setBlockers(e.target.value)} className="w-full p-1.5 border border-gray-200 rounded text-xs" />
+          </div>
+          <div>
+            <label className="block text-[9px] uppercase tracking-wider text-gray-400 font-bold mb-0.5">Unfinished Rescheduled Items</label>
+            <input type="text" value={unfinishedNotes} onChange={(e) => setUnfinishedNotes(e.target.value)} className="w-full p-1.5 border border-gray-200 rounded text-xs" />
+          </div>
+          <div>
+            <label className="block text-[9px] uppercase tracking-wider text-gray-400 font-bold mb-0.5">Tomorrow's High Priorities</label>
+            <input type="text" value={tomorrowPriorities} onChange={(e) => setTomorrowPriorities(e.target.value)} className="w-full p-1.5 border border-gray-200 rounded text-xs" />
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 text-[11px] leading-relaxed">
+          <div className="bg-emerald-50/35 p-2 rounded-lg border border-emerald-100">
+            <span className="block text-[8px] uppercase tracking-wider text-emerald-600 font-bold mb-0.5">🏆 Wins & Breakthroughs</span>
+            <p className="text-gray-700 font-medium">{review.wins || 'No wins logged.'}</p>
+          </div>
+          <div className="bg-rose-50/35 p-2 rounded-lg border border-rose-100">
+            <span className="block text-[8px] uppercase tracking-wider text-rose-500 font-bold mb-0.5">🛑 Blockers & Roadblocks</span>
+            <p className="text-gray-700 font-medium">{review.blockers || 'No blockers logged.'}</p>
+          </div>
+          <div className="bg-amber-50/35 p-2 rounded-lg border border-amber-100">
+            <span className="block text-[8px] uppercase tracking-wider text-amber-600 font-bold mb-0.5">⏳ Unfinished Rescheduled Items</span>
+            <p className="text-gray-700 font-medium">{review.unfinishedNotes || 'None.'}</p>
+          </div>
+          <div className="bg-blue-50/35 p-2 rounded-lg border border-blue-100">
+            <span className="block text-[8px] uppercase tracking-wider text-blue-600 font-bold mb-0.5">🎯 Tomorrow's Priorities</span>
+            <p className="text-gray-700 font-medium">{review.tomorrowPriorities || 'None.'}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
-  // Theme State
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('sj_os_theme');
-    return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  });
+  // Theme State - Locked to Light Mode (No dark/light theme toggle)
+  const darkMode = false;
 
   // Core OS Database States
   const [contacts, setContacts] = useState<Contact[]>(() => {
@@ -64,6 +150,17 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState<string>('2026-07-21'); // Today is set to July 21, 2026
   const [showHelp, setShowHelp] = useState(false);
   const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<'calendar' | 'contacts'>('calendar');
+  const [activePage, setActivePage] = useState<'master' | 'calendar' | 'contacts' | 'history'>('master');
+  
+  // Master persistent Notes Area state (Apple Notes style)
+  const [masterNotes, setMasterNotes] = useState<string>(() => {
+    const saved = localStorage.getItem('sj_os_master_notes');
+    return saved || "✍️ Executive Scratchpad & Sticky Notes\n- Feel free to scribble, draft replies, or plan agendas here.\n- Auto-saved on every keystroke, fully offline-first!\n\n💡 Current Action Plan:\n- Review Phase 2 Elevation blueprint with client.\n- Verify dispatched cladding material receipt.";
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sj_os_master_notes', masterNotes);
+  }, [masterNotes]);
 
   // Sync state to LocalStorage
   useEffect(() => {
@@ -130,27 +227,51 @@ export default function App() {
       }
     };
 
+    const handleUpdateTimelineEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ id: string; title: string; notes: string }>;
+      if (customEvent.detail && customEvent.detail.id) {
+        setTimelineEvents((prev) =>
+          prev.map((ev) => {
+            if (ev.id === customEvent.detail.id) {
+              return {
+                ...ev,
+                title: customEvent.detail.title,
+                notes: customEvent.detail.notes,
+              };
+            }
+            return ev;
+          })
+        );
+      }
+    };
+
+    const handleDeleteTimelineEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (customEvent.detail) {
+        setTimelineEvents((prev) => prev.filter((ev) => ev.id !== customEvent.detail));
+      }
+    };
+
     window.addEventListener('sj_os_add_calendar_item', handleAddCalendarItem);
     window.addEventListener('sj_os_add_timeline_event', handleAddTimelineEvent);
     window.addEventListener('sj_os_update_contact', handleUpdateContact);
+    window.addEventListener('sj_os_update_timeline_event', handleUpdateTimelineEvent);
+    window.addEventListener('sj_os_delete_timeline_event', handleDeleteTimelineEvent);
 
     return () => {
       window.removeEventListener('sj_os_add_calendar_item', handleAddCalendarItem);
       window.removeEventListener('sj_os_add_timeline_event', handleAddTimelineEvent);
       window.removeEventListener('sj_os_update_contact', handleUpdateContact);
+      window.removeEventListener('sj_os_update_timeline_event', handleUpdateTimelineEvent);
+      window.removeEventListener('sj_os_delete_timeline_event', handleDeleteTimelineEvent);
     };
   }, []);
 
   useEffect(() => {
     const root = document.documentElement;
-    if (darkMode) {
-      root.classList.add('dark');
-      localStorage.setItem('sj_os_theme', 'dark');
-    } else {
-      root.classList.remove('dark');
-      localStorage.setItem('sj_os_theme', 'light');
-    }
-  }, [darkMode]);
+    root.classList.remove('dark');
+    localStorage.setItem('sj_os_theme', 'light');
+  }, []);
 
   // Compute stats for Header
   const activeLeads = contacts.length;
@@ -619,67 +740,81 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBFBFD] dark:bg-[#000000] text-[#1D1D1F] dark:text-[#E8E8ED] font-sans transition-colors duration-200">
-      {/* 1. Dynamic Header Navigation */}
-      <header className="border-b border-[#E8E8ED] dark:border-neutral-900 bg-white/70 dark:bg-[#000000]/70 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-amber-500 text-white rounded-xl p-1.5 font-extrabold text-sm tracking-tight shadow-md flex items-center justify-center h-8 w-8">
-              SJ
+    <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#000000] text-[#1D1D1F] dark:text-[#F5F5F7] font-sans antialiased transition-colors duration-250">
+      {/* 1. Dynamic Header Navigation (Apple-style Translucent Navigation Bar) */}
+      <header className="border-b border-[#E5E5EA] bg-[#FFFFFF]/80 backdrop-blur-xl sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-5 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            {/* Native squircle app icon layout */}
+            <div className="bg-[#007AFF] text-white rounded-xl h-9 w-9 font-bold text-sm tracking-tight shadow-sm flex items-center justify-center relative overflow-hidden">
+              <span className="relative z-10 text-base font-semibold">SJ</span>
+              <div className="absolute inset-0 bg-linear-to-b from-white/10 to-transparent pointer-events-none" />
             </div>
             <div>
-              <h1 className="text-sm font-extrabold tracking-tight dark:text-white leading-none">
-                SJ OS <span className="text-[10px] text-amber-500 font-bold ml-1 px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/50">v1.2</span>
+              <h1 className="text-sm font-semibold tracking-tight text-[#1D1D1F] leading-none flex items-center gap-1.5">
+                SJ OS 
+                <span className="text-[10px] text-[#007AFF] font-medium px-1.5 py-0.5 rounded-md bg-[#007AFF]/10">v1.2</span>
               </h1>
-              <p className="text-[10px] text-gray-400 dark:text-neutral-500 font-bold uppercase tracking-widest mt-0.5">
+              <p className="text-[10px] text-[#8E8E93] font-medium uppercase tracking-wider mt-0.5">
                 Executive Work Operating System
               </p>
             </div>
           </div>
 
-          {/* Core Analytics Badges */}
-          <div className="hidden lg:flex items-center gap-6 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-blue-50 dark:bg-blue-950/20 rounded-lg text-blue-500">
-                <Users className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="block text-[9px] text-gray-400 uppercase font-bold">Partners</span>
-                <span className="font-extrabold text-gray-800 dark:text-neutral-200">{activeLeads} Profiles</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-orange-50 dark:bg-orange-950/20 rounded-lg text-orange-500">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="block text-[9px] text-gray-400 uppercase font-bold">Avg Heat</span>
-                <span className="font-extrabold text-gray-800 dark:text-neutral-200">{averageHeat}% score</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg text-emerald-500">
-                <Activity className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="block text-[9px] text-gray-400 uppercase font-bold">Today's Focus</span>
-                <span className="font-extrabold text-gray-800 dark:text-neutral-200">{completedTodayCount}/{totalTodayCount} done</span>
-              </div>
-            </div>
+          {/* PAGE NAVIGATION SEGMENTS (Separate pages, keeping current as master sheet) */}
+          <div className="flex items-center bg-[#F2F2F7] p-0.5 rounded-xl border border-[#E5E5EA]">
+            <button
+              onClick={() => setActivePage('master')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                activePage === 'master'
+                  ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                  : 'text-[#8E8E93] hover:text-[#1D1D1F]'
+              }`}
+            >
+              Master Dashboard
+            </button>
+            <button
+              onClick={() => setActivePage('contacts')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                activePage === 'contacts'
+                  ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                  : 'text-[#8E8E93] hover:text-[#1D1D1F]'
+              }`}
+            >
+              Partners Directory
+            </button>
+            <button
+              onClick={() => setActivePage('calendar')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                activePage === 'calendar'
+                  ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                  : 'text-[#8E8E93] hover:text-[#1D1D1F]'
+              }`}
+            >
+              Living Calendar
+            </button>
+            <button
+              onClick={() => setActivePage('history')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                activePage === 'history'
+                  ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                  : 'text-[#8E8E93] hover:text-[#1D1D1F]'
+              }`}
+            >
+              EOD Logs & History
+            </button>
           </div>
 
           {/* Quick Controls */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             {/* Intelligent build week button */}
             <button
               onClick={handleBuildMyWeek}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#F5F5F7] dark:bg-neutral-800 text-[#1D1D1F] dark:text-white border border-gray-200 dark:border-neutral-700/60 transition active:scale-95 hover:bg-gray-100"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#F2F2F7] hover:bg-[#E5E5EA] text-[#1D1D1F] transition-all active:scale-95 cursor-pointer border border-[#E5E5EA]"
               title="Quietly analyzes pipeline and auto-creates optimized 5-day workload calendar"
               id="btn_build_week"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <Sparkles className="w-3.5 h-3.5 text-[#FF9500]" />
               Build My Week
             </button>
 
@@ -692,17 +827,10 @@ export default function App() {
             />
 
             <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-500 dark:text-neutral-400 transition"
-              id="btn_theme_toggle"
-            >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            <button
               onClick={() => setShowHelp(!showHelp)}
-              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-gray-600 transition"
+              className="p-2 rounded-full hover:bg-[#F2F2F7] text-[#8E8E93] hover:text-[#1D1D1F] transition cursor-pointer"
               id="btn_help_info"
+              title="Help Info"
             >
               <HelpCircle className="w-4.5 h-4.5" />
             </button>
@@ -721,23 +849,23 @@ export default function App() {
             id="help_guide_banner"
           >
             <div className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-1 md:grid-cols-3 gap-4.5 text-xs">
-              <div className="p-3 bg-white dark:bg-neutral-900 rounded-xl shadow-xs border border-black/5">
-                <span className="font-extrabold text-amber-500 block mb-1">Living Calendar</span>
-                <p className="text-gray-550 dark:text-neutral-400 leading-relaxed font-medium">
+              <div className="p-3 bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-xl shadow-xs border border-[#E5E5EA] dark:border-[#2C2C2E]">
+                <span className="font-semibold text-[#007AFF] block mb-1">Living Calendar</span>
+                <p className="text-[#8E8E93] leading-relaxed font-medium">
                   SJ OS is self-maintaining. When you complete items, the assistant automatically increments client relationships, registers logs, and updates pipelines without admin pages.
                 </p>
               </div>
 
-              <div className="p-3 bg-white dark:bg-neutral-900 rounded-xl shadow-xs border border-black/5">
-                <span className="font-extrabold text-amber-500 block mb-1">Progressive Depth Layers</span>
-                <p className="text-gray-550 dark:text-neutral-400 leading-relaxed font-medium">
+              <div className="p-3 bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-xl shadow-xs border border-[#E5E5EA] dark:border-[#2C2C2E]">
+                <span className="font-semibold text-[#007AFF] block mb-1">Progressive Depth Layers</span>
+                <p className="text-[#8E8E93] leading-relaxed font-medium">
                   Say goodbye to forms. Access Layer 1 (Immediate Action Desk), Layer 2 (Surrounding Context Briefing), Layer 3 (Memory Archive), or Layer 4 (Business Analytics) instantly, keeping you productive without clutter.
                 </p>
               </div>
 
-              <div className="p-3 bg-white dark:bg-neutral-900 rounded-xl shadow-xs border border-black/5">
-                <span className="font-extrabold text-amber-500 block mb-1">Daily Realignment</span>
-                <p className="text-gray-550 dark:text-neutral-400 leading-relaxed font-medium">
+              <div className="p-3 bg-[#FFFFFF] dark:bg-[#1C1C1E] rounded-xl shadow-xs border border-[#E5E5EA] dark:border-[#2C2C2E]">
+                <span className="font-semibold text-[#007AFF] block mb-1">Daily Realignment</span>
+                <p className="text-[#8E8E93] leading-relaxed font-medium">
                   At end-of-day, answer 4 brief metrics. SJ OS will automatically sweep unfinished and rescheduled calls onto tomorrow's optimized schedule.
                 </p>
               </div>
@@ -755,59 +883,79 @@ export default function App() {
           onDismissSuggestion={handleDismissSuggestion}
         />
 
-        {/* Mobile & Tablet Workspace Tabs Switcher */}
-        <div className="lg:hidden bg-[#F2F2F7] dark:bg-neutral-900 p-1 rounded-2xl border border-gray-200/50 dark:border-neutral-800 grid grid-cols-2 gap-1 max-w-md mx-auto">
-          <button
-            onClick={() => setActiveWorkspaceTab('calendar')}
-            className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
-              activeWorkspaceTab === 'calendar'
-                ? 'bg-white dark:bg-neutral-800 text-gray-900 dark:text-white shadow-xs'
-                : 'text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-neutral-200'
-            }`}
-          >
-            <Calendar className="w-4 h-4 text-amber-500" />
-            Living Calendar
-          </button>
-          <button
-            onClick={() => setActiveWorkspaceTab('contacts')}
-            className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
-              activeWorkspaceTab === 'contacts'
-                ? 'bg-white dark:bg-neutral-800 text-gray-900 dark:text-white shadow-xs'
-                : 'text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-neutral-200'
-            }`}
-          >
-            <Users className="w-4 h-4 text-blue-500" />
-            Partners Directory
-          </button>
-        </div>
+        {/* PAGE RENDERING SYSTEM */}
+        {activePage === 'master' && (
+          <div className="space-y-6">
+            {/* Mobile & Tablet Workspace Tabs Switcher (iOS Native Segmented Control Style) */}
+            <div className="lg:hidden bg-[#E3E3E9] p-0.5 rounded-xl grid grid-cols-2 max-w-sm mx-auto shadow-xs border border-transparent">
+              <button
+                onClick={() => setActiveWorkspaceTab('calendar')}
+                className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activeWorkspaceTab === 'calendar'
+                    ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                    : 'text-[#8E8E93] hover:text-[#1D1D1F]'
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5 text-[#007AFF]" />
+                Living Calendar
+              </button>
+              <button
+                onClick={() => setActiveWorkspaceTab('contacts')}
+                className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activeWorkspaceTab === 'contacts'
+                    ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                    : 'text-[#8E8E93] hover:text-[#1D1D1F]'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5 text-[#007AFF]" />
+                Partners Directory
+              </button>
+            </div>
 
-        {/* Master Balanced Workspace Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          {/* Left Block: Living Calendar (5 Cols) */}
-          <section className={`lg:col-span-5 h-[620px] lg:h-[750px] ${
-            activeWorkspaceTab === 'calendar' ? 'block' : 'hidden lg:block'
-          }`}>
-            <CalendarView
-              selectedDate={selectedDate}
-              onSelectDate={setSelectedDate}
-              calendarItems={calendarItems}
-              onToggleComplete={handleToggleComplete}
-              onRebalanceDay={handleRebalanceDay}
-              onSelectContact={(contactId) => {
-                setSelectedContactId(contactId);
-                setActiveWorkspaceTab('contacts');
-                // Switch focus context
-                const section = document.getElementById('contacts_and_timeline_module');
-                if (section) section.scrollIntoView({ behavior: 'smooth' });
-              }}
-              onPostponeTask={handlePostponeTask}
-            />
-          </section>
+            {/* Master Balanced Workspace Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              {/* Left Block: Living Calendar (5 Cols) */}
+              <section className={`lg:col-span-5 h-[620px] lg:h-[750px] ${
+                activeWorkspaceTab === 'calendar' ? 'block' : 'hidden lg:block'
+              }`}>
+                <CalendarView
+                  selectedDate={selectedDate}
+                  onSelectDate={setSelectedDate}
+                  calendarItems={calendarItems}
+                  onToggleComplete={handleToggleComplete}
+                  onRebalanceDay={handleRebalanceDay}
+                  onSelectContact={(contactId) => {
+                    setSelectedContactId(contactId);
+                    setActiveWorkspaceTab('contacts');
+                    // Switch focus context
+                    const section = document.getElementById('contacts_and_timeline_module');
+                    if (section) section.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  onPostponeTask={handlePostponeTask}
+                />
+              </section>
 
-          {/* Right Block: Directory, Chronological Messaging Timelines, and Briefings (7 Cols) */}
-          <section className={`lg:col-span-7 h-[680px] lg:h-[750px] ${
-            activeWorkspaceTab === 'contacts' ? 'block' : 'hidden lg:block'
-          }`}>
+              {/* Right Block: Directory, Chronological Messaging Timelines, and Briefings (7 Cols) */}
+              <section className={`lg:col-span-7 h-[680px] lg:h-[750px] ${
+                activeWorkspaceTab === 'contacts' ? 'block' : 'hidden lg:block'
+              }`}>
+                <ContactsView
+                  contacts={contacts}
+                  timelineEvents={timelineEvents}
+                  calendarItems={calendarItems}
+                  onAddContact={handleAddContact}
+                  onDeleteContact={handleDeleteContact}
+                  onSelectContact={setSelectedContactId}
+                  selectedContactId={selectedContactId}
+                  onTriggerOneTapWorkflow={handleTriggerOneTapWorkflow}
+                />
+              </section>
+            </div>
+          </div>
+        )}
+
+        {activePage === 'contacts' && (
+          <div className="w-full h-[800px] bg-white rounded-2xl border border-[#E5E5EA] overflow-hidden p-1">
             <ContactsView
               contacts={contacts}
               timelineEvents={timelineEvents}
@@ -818,24 +966,150 @@ export default function App() {
               selectedContactId={selectedContactId}
               onTriggerOneTapWorkflow={handleTriggerOneTapWorkflow}
             />
-          </section>
-        </div>
+          </div>
+        )}
 
-        {/* 4. Bottom Row: End of Day Realignment reviews history */}
-        <footer className="border-t border-[#E8E8ED] dark:border-neutral-800 pt-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {activePage === 'calendar' && (
+          <div className="w-full h-[800px] bg-white rounded-2xl border border-[#E5E5EA] overflow-hidden p-1">
+            <CalendarView
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+              calendarItems={calendarItems}
+              onToggleComplete={handleToggleComplete}
+              onRebalanceDay={handleRebalanceDay}
+              onSelectContact={(contactId) => {
+                setSelectedContactId(contactId);
+                setActivePage('contacts');
+              }}
+              onPostponeTask={handlePostponeTask}
+            />
+          </div>
+        )}
+
+        {activePage === 'history' && (
+          <div className="w-full min-h-[700px] bg-white rounded-2xl border border-[#E5E5EA] p-6 space-y-6 animate-fadeIn text-[#1D1D1F]">
             <div>
-              <h3 className="text-xs font-extrabold uppercase text-gray-400 dark:text-neutral-500 tracking-wider">
-                SJ OS Alignment Desk
+              <h2 className="text-base font-bold text-[#1D1D1F]">EOD Logs & History Vault</h2>
+              <p className="text-xs text-[#8E8E93] font-medium mt-0.5">
+                Review, edit, and delete past alignment logs and explore the master stream of all partner timeline logs.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Daily Reviews list (7 Cols) */}
+              <div className="lg:col-span-7 space-y-4">
+                <h3 className="text-xs font-bold uppercase text-[#8E8E93] tracking-wider flex items-center gap-1">
+                  📅 Past Daily Realignment Reviews ({dailyReviews.length})
+                </h3>
+                {dailyReviews.length === 0 ? (
+                  <div className="p-8 text-center text-[#8E8E93] border border-dashed border-[#E5E5EA] rounded-xl text-xs font-medium">
+                    No end-of-day reviews logged yet. Submit a review via the Alignment Desk below to populate this vault.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {dailyReviews.map((rev) => (
+                      <HistoryReviewCard
+                        key={rev.id}
+                        review={rev}
+                        onDelete={(id) => {
+                          if (confirm('Are you sure you want to delete this Daily Review?')) {
+                            setDailyReviews((prev) => prev.filter((r) => r.id !== id));
+                          }
+                        }}
+                        onSave={(id, updated) => {
+                          setDailyReviews((prev) =>
+                            prev.map((r) => (r.id === id ? { ...r, ...updated } : r))
+                          );
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Global Timeline Event Stream (5 Cols) */}
+              <div className="lg:col-span-5 space-y-4 bg-[#F2F2F7]/50 p-4 rounded-xl border border-[#E5E5EA]">
+                <h3 className="text-xs font-bold uppercase text-[#8E8E93] tracking-wider">
+                  📜 Global Activities Audit Feed
+                </h3>
+                <div className="max-h-[550px] overflow-y-auto space-y-2 pr-1 scrollbar-thin">
+                  {timelineEvents.map((ev) => {
+                    const contactName = contacts.find((c) => c.id === ev.contactId)?.name || 'Unknown Partner';
+                    const getEmoji = (t: string) => {
+                      switch (t) {
+                        case 'call': return '📞';
+                        case 'meeting': return '🤝';
+                        case 'drawing': return '📐';
+                        case 'quote': return '💼';
+                        case 'order': return '📦';
+                        case 'production': return '🏭';
+                        case 'dispatch': return '🚛';
+                        case 'payment': return '💰';
+                        case 'status_change': return '🔄';
+                        default: return '📝';
+                      }
+                    };
+                    return (
+                      <div key={ev.id} className="p-3 bg-white rounded-lg border border-[#E5E5EA] text-xs space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-gray-400">
+                          <span className="font-bold uppercase text-[#007AFF]">
+                            {getEmoji(ev.type)} {ev.type}
+                          </span>
+                          <span>{new Date(ev.timestamp).toLocaleDateString()}</span>
+                        </div>
+                        <div className="font-semibold text-[#1D1D1F]">{ev.title}</div>
+                        <p className="text-[10px] text-[#8E8E93] font-medium italic">Partner: {contactName}</p>
+                        {ev.notes && (
+                          <p className="text-[10px] text-[#8E8E93] bg-[#F2F2F7]/30 p-1.5 rounded mt-1 border border-gray-100 whitespace-pre-wrap leading-relaxed">
+                            {ev.notes}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {timelineEvents.length === 0 && (
+                    <p className="text-center text-gray-400 text-xs py-12">No registered activities in history.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 4. Bottom Row: End of Day Realignment & Persistent Notes Area */}
+        <footer className="border-t border-[#E5E5EA] pt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Alignment Desk */}
+          <div className="lg:col-span-6 flex flex-col justify-between bg-white p-5 rounded-2xl border border-[#E5E5EA]">
+            <div>
+              <h3 className="text-xs font-bold uppercase text-[#8E8E93] tracking-wider flex items-center gap-1">
+                <span>🎯</span> SJ OS Alignment Desk
               </h3>
-              <p className="text-[11px] text-gray-500 dark:text-neutral-400 font-medium">
+              <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5">
                 Conclude the day to trigger automated schedule sweep and workload balancing.
               </p>
             </div>
 
-            <DailyReviewComponent
-              onCompleteReview={handleCompleteDailyReview}
-              reviewsHistory={dailyReviews}
+            <div className="mt-4">
+              <DailyReviewComponent
+                onCompleteReview={handleCompleteDailyReview}
+                reviewsHistory={dailyReviews}
+              />
+            </div>
+          </div>
+
+          {/* Persistent Notes Area (Requirement 5) */}
+          <div className="lg:col-span-6 flex flex-col bg-[#FFFDEB]/90 p-5 rounded-2xl border border-[#EBE3C5] shadow-xs">
+            <div className="flex items-center justify-between pb-2 border-b border-[#EBE3C5]/60 mb-2">
+              <h3 className="text-xs font-bold uppercase text-[#857342] tracking-wider flex items-center gap-1.5">
+                <span className="text-sm">✍️</span> Executive Yellow Pad (Persistent Scratchpad)
+              </h3>
+              <span className="text-[9px] text-[#A69460] font-bold font-mono">AUTOSAVED</span>
+            </div>
+            <textarea
+              value={masterNotes}
+              onChange={(e) => setMasterNotes(e.target.value)}
+              placeholder="Scribble quick notes, client phone numbers, agendas, or design dimensions here..."
+              className="w-full flex-1 min-h-[120px] bg-transparent text-xs text-[#423D2B] leading-relaxed focus:outline-hidden font-medium placeholder-[#B8AD8A] resize-none"
             />
           </div>
         </footer>

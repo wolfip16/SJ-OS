@@ -137,29 +137,29 @@ export function CalendarView({
   };
 
   return (
-    <div className="bg-white dark:bg-neutral-900 border border-gray-150 dark:border-neutral-800 rounded-2xl shadow-xs p-4 flex flex-col h-full overflow-hidden">
+    <div className="bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E5E5EA] dark:border-[#2C2C2E] rounded-2xl shadow-xs p-4 flex flex-col h-full overflow-hidden">
       {/* Date Switching Header */}
-      <div className="flex flex-col gap-3 pb-3 border-b border-gray-100 dark:border-neutral-800 shrink-0">
+      <div className="flex flex-col gap-3 pb-3 border-b border-[#F2F2F7] dark:border-[#2C2C2E] shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4.5 h-4.5 text-amber-500" />
-            <h3 className="font-extrabold text-sm dark:text-white tracking-tight">
+            <Calendar className="w-4.5 h-4.5 text-[#007AFF]" />
+            <h3 className="font-semibold text-sm text-[#1D1D1F] dark:text-[#FFFFFF] tracking-tight">
               Living Workload Calendar
             </h3>
           </div>
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => onRebalanceDay(selectedDate)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#F5F5F7] hover:bg-gray-100 dark:bg-neutral-800 dark:hover:bg-neutral-750 text-[10px] font-bold text-gray-700 dark:text-white border border-gray-200/50 dark:border-neutral-700/60 transition active:scale-95"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-[10px] font-semibold text-[#1D1D1F] dark:text-[#FFFFFF] transition-all active:scale-95 cursor-pointer"
               title="Alternates mental heavy items with breaks to balance energy"
               id="btn_rebalance_day"
             >
-              <RotateCw className="w-3 h-3 text-amber-500" />
+              <RotateCw className="w-3 h-3 text-[#007AFF]" />
               Auto Balance
             </button>
             <button
               onClick={() => setIsAddingEvent(!isAddingEvent)}
-              className="p-1 rounded-xl bg-gray-900 hover:bg-black dark:bg-neutral-800 dark:hover:bg-neutral-700 text-white transition"
+              className="p-1.5 rounded-lg bg-[#007AFF] hover:bg-[#0066CC] dark:bg-[#007AFF] dark:hover:bg-[#0066CC] text-white transition-all cursor-pointer active:scale-95"
               id="btn_add_calendar_popover"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -167,8 +167,8 @@ export function CalendarView({
           </div>
         </div>
 
-        {/* Working Days Row */}
-        <div className="grid grid-cols-5 gap-1.5 bg-gray-50/70 dark:bg-neutral-850 p-1 rounded-xl border border-black/5">
+        {/* Working Days Row (Apple Calendar Layout Style) */}
+        <div className="grid grid-cols-5 gap-1 bg-[#E3E3E9]/55 dark:bg-[#1C1C1E]/60 p-0.5 rounded-xl border border-transparent dark:border-[#2C2C2E]">
           {workingDays.map((day) => {
             const isSelected = selectedDate === day.date;
             const isToday = day.date === '2026-07-21';
@@ -176,20 +176,36 @@ export function CalendarView({
               <button
                 key={day.date}
                 onClick={() => onSelectDate(day.date)}
-                className={`py-1.5 px-1 text-center rounded-lg transition relative ${
+                className={`py-2 px-1 text-center rounded-lg transition-all relative cursor-pointer ${
                   isSelected
-                    ? 'bg-white dark:bg-neutral-800 text-gray-900 dark:text-white shadow-xs font-bold border border-black/[0.03]'
-                    : 'text-gray-550 dark:text-neutral-450 font-semibold hover:bg-white/40 dark:hover:bg-neutral-800/40'
+                    ? 'bg-white dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)] font-semibold'
+                    : 'text-[#8E8E93] hover:text-[#1D1D1F] dark:hover:text-white font-medium'
                 }`}
                 id={`btn_date_${day.date}`}
               >
-                <span className="block text-[10px] leading-none uppercase tracking-wider">
-                  <span className="hidden sm:inline">{day.label}</span>
+                <span className="block text-[9px] leading-none uppercase tracking-wider font-semibold">
+                  <span className="hidden sm:inline">{day.label.replace(' (Today)', '')}</span>
                   <span className="inline sm:hidden">{day.shortLabel}</span>
                 </span>
-                <span className="block text-xs font-extrabold mt-0.5">{day.date.split('-')[2]}</span>
-                {isToday && (
-                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-amber-500 rounded-full" />
+                
+                {/* Visual Circle highlight for selected or today */}
+                <span className="inline-flex items-center justify-center h-6 w-6 rounded-full mt-1.5 transition-all text-xs font-bold">
+                  <span className={`h-6 w-6 rounded-full flex items-center justify-center ${
+                    isToday
+                      ? isSelected
+                        ? 'bg-[#007AFF] text-white font-bold'
+                        : 'text-[#007AFF] font-bold border border-[#007AFF]/40'
+                      : isSelected
+                        ? 'bg-[#1D1D1F] dark:bg-white text-white dark:text-[#1D1D1F]'
+                        : ''
+                  }`}>
+                    {day.date.split('-')[2]}
+                  </span>
+                </span>
+
+                {/* Micro indicator dot below */}
+                {isToday && !isSelected && (
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#007AFF] rounded-full" />
                 )}
               </button>
             );

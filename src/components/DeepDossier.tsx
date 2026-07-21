@@ -98,6 +98,18 @@ export function DeepDossier({
   onChangeTab,
   onClose,
 }: DeepDossierProps) {
+  // Toast notification HUD
+  const [toast, setToast] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // Timeline event editing states
+  const [editingTimelineId, setEditingTimelineId] = useState<string | null>(null);
+  const [editTimelineTitle, setEditTimelineTitle] = useState('');
+  const [editTimelineNotes, setEditTimelineNotes] = useState('');
+
   // Local project states (synced to LocalStorage)
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [newProjectName, setNewProjectName] = useState('');
@@ -299,7 +311,7 @@ export function DeepDossier({
     setMeetingAttendees('');
     setMeetingMoM('');
     setMeetingActionItems('');
-    alert('Meeting Minutes registered successfully in timeline!');
+    showToast('Meeting Minutes registered successfully in timeline!');
   };
 
   const handleSaveCallLog = (e: FormEvent) => {
@@ -308,7 +320,7 @@ export function DeepDossier({
 
     triggerGlobalTimelineEvent('call', `Call Logged: ${callOutcome}`, callNotesText);
     setCallNotesText('');
-    alert('Call log added to persistent memory archive.');
+    showToast('Call log added to persistent memory archive.');
   };
 
   const handleAddQuoteItem = (e: FormEvent) => {
@@ -332,7 +344,7 @@ export function DeepDossier({
     triggerGlobalContactUpdate({ stage: 'Quotation Sent' });
     triggerGlobalCalendarItem(`Call: Review bid with ${contact.name}`, 'quote', 'high');
 
-    alert(`Commercial Quote generated. Sync Complete: Stage modified to "Quotation Sent".`);
+    showToast(`Commercial Quote generated. Stage modified to "Quotation Sent".`);
   };
 
   const handleIssueDwgRequest = (e: FormEvent) => {
@@ -345,7 +357,7 @@ export function DeepDossier({
     triggerGlobalCalendarItem(`Review drawings from ${dwgDesigner}`, 'drawing', 'medium');
 
     setDwgTitle('');
-    alert('CAD Drawing request sent. Pipeline Stage synced to "Need Drawing".');
+    showToast('CAD Drawing request sent. Pipeline Stage synced to "Need Drawing".');
   };
 
   const handleAddDispatchLog = (e: FormEvent) => {
@@ -357,7 +369,7 @@ export function DeepDossier({
     triggerGlobalContactUpdate({ stage: 'Dispatch' });
 
     setDispatchRef('');
-    alert('Logistics dispatch record written to permanent timeline.');
+    showToast('Logistics dispatch record written to permanent timeline.');
   };
 
   const handleAddPaymentLog = (e: FormEvent) => {
@@ -369,12 +381,12 @@ export function DeepDossier({
     triggerGlobalContactUpdate({ heatScore: Math.min(100, contact.heatScore + 10) });
 
     setPayRef('');
-    alert(`Payment recorded. Sync complete: Partner Heat Score boosted due to successful clearance.`);
+    showToast(`Payment recorded. Partner Heat Score boosted!`);
   };
 
   const handleSaveScratchpad = () => {
     triggerGlobalContactUpdate({ notes: notesScratchpad });
-    alert('Scratchpad notes updated and synchronized in the contact profile.');
+    showToast('Scratchpad notes updated and synchronized in the contact profile.');
   };
 
   // Filtered timeline
@@ -493,31 +505,109 @@ export function DeepDossier({
                     default: return '📝';
                   }
                 };
+
+                const isEditing = editingTimelineId === ev.id;
+
+                const handleSaveEdit = () => {
+                  window.dispatchEvent(
+                    new CustomEvent('sj_os_update_timeline_event', {
+                      detail: { id: ev.id, title: editTimelineTitle, notes: editTimelineNotes },
+                    })
+                  );
+                  setEditingTimelineId(null);
+                  showToast('Timeline segment successfully updated.');
+                };
+
+                const handleDelete = () => {
+                  if (confirm('Are you sure you want to delete this timeline segment permanently?')) {
+                    window.dispatchEvent(
+                      new CustomEvent('sj_os_delete_timeline_event', {
+                        detail: { id: ev.id },
+                      })
+                    );
+                    showToast('Timeline segment deleted.');
+                  }
+                };
+
                 return (
                   <div
                     key={ev.id}
-                    className="p-3 bg-gray-50/50 dark:bg-neutral-850/20 rounded-xl border border-gray-100 dark:border-neutral-800 flex items-start gap-3"
+                    className="p-3 bg-gray-50/50 rounded-xl border border-gray-100 flex items-start gap-3 relative group"
                   >
-                    <div className="h-7 w-7 bg-white dark:bg-neutral-900 border border-gray-150 dark:border-neutral-800 rounded-lg flex items-center justify-center text-xs shadow-xs select-none mt-0.5">
+                    <div className="h-7 w-7 bg-white border border-gray-150 rounded-lg flex items-center justify-center text-xs shadow-xs select-none mt-0.5">
                       {getEventEmoji(ev.type)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-gray-900 dark:text-white">
-                          {ev.title}
-                        </span>
-                        <span className="text-[10px] text-gray-400 font-semibold font-mono">
-                          {new Date(ev.timestamp).toLocaleString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-gray-650 dark:text-neutral-400 mt-1 whitespace-pre-wrap leading-relaxed font-medium">
-                        {ev.notes}
-                      </p>
+                      {isEditing ? (
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            value={editTimelineTitle}
+                            onChange={(e) => setEditTimelineTitle(e.target.value)}
+                            className="w-full text-xs font-semibold p-1.5 bg-white border border-gray-200 rounded focus:outline-hidden focus:ring-1 focus:ring-[#007AFF]"
+                          />
+                          <textarea
+                            value={editTimelineNotes}
+                            onChange={(e) => setEditTimelineNotes(e.target.value)}
+                            className="w-full text-xs p-1.5 bg-white border border-gray-200 rounded h-16 focus:outline-hidden focus:ring-1 focus:ring-[#007AFF] resize-none"
+                          />
+                          <div className="flex justify-end gap-1.5">
+                            <button
+                              onClick={handleSaveEdit}
+                              className="px-2 py-1 bg-[#007AFF] text-white text-[10px] font-bold rounded hover:bg-[#0062CC] cursor-pointer"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingTimelineId(null)}
+                              className="px-2 py-1 bg-gray-100 text-[#1D1D1F] text-[10px] font-bold rounded hover:bg-gray-200 cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-gray-900">
+                              {ev.title}
+                            </span>
+                            <span className="text-[10px] text-gray-400 font-semibold font-mono">
+                              {new Date(ev.timestamp).toLocaleString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-gray-650 mt-1 whitespace-pre-wrap leading-relaxed font-medium">
+                            {ev.notes}
+                          </p>
+
+                          {/* Interactive Segment Controls (Requirement 3: edit access on each segment) */}
+                          <div className="flex items-center gap-3 mt-2 pt-1 border-t border-dashed border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => {
+                                setEditingTimelineId(ev.id);
+                                setEditTimelineTitle(ev.title);
+                                setEditTimelineNotes(ev.notes || '');
+                              }}
+                              className="text-[10px] text-gray-400 hover:text-[#007AFF] font-bold flex items-center gap-0.5 cursor-pointer"
+                              title="Edit segment"
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button
+                              onClick={handleDelete}
+                              className="text-[10px] text-gray-400 hover:text-red-600 font-bold flex items-center gap-0.5 cursor-pointer"
+                              title="Delete segment"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -1134,7 +1224,7 @@ export function DeepDossier({
                     'Core sandblasting completed for first 4,000 sq ft. Surface seal chemistry successfully applied on line-2.'
                   );
                   triggerGlobalContactUpdate({ stage: 'Production Started' });
-                  alert('Production log entered in timeline. Category synced.');
+                  showToast('Production log entered in timeline. Category synced.');
                 }}
                 className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded text-[10px] cursor-pointer shadow-xs transition"
               >
@@ -1480,6 +1570,14 @@ export function DeepDossier({
           </div>
         )}
       </div>
+
+      {/* Toast Notification HUD */}
+      {toast && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 bg-neutral-950/90 dark:bg-white/95 text-white dark:text-neutral-900 backdrop-blur-md px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 border border-neutral-800/80 dark:border-white/20 text-xs font-semibold max-w-sm transition-all animate-bounce">
+          <Check className="w-4 h-4 text-emerald-500" />
+          <span>{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

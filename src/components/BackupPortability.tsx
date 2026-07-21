@@ -175,10 +175,10 @@ export function BackupPortability({
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#F5F5F7] dark:bg-neutral-800 text-[#1D1D1F] dark:text-white border border-gray-200 dark:border-neutral-700/60 transition active:scale-95 hover:bg-gray-100"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-[#1D1D1F] dark:text-[#FFFFFF] border border-transparent transition-all active:scale-95 cursor-pointer"
         id="btn_portability_menu"
       >
-        <Database className="w-3.5 h-3.5 text-blue-500" />
+        <Database className="w-3.5 h-3.5 text-[#007AFF]" />
         Data Portability
       </button>
 
@@ -187,44 +187,46 @@ export function BackupPortability({
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div 
-            className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-neutral-800 rounded-2xl shadow-xl p-4 z-50 text-xs"
+            className="absolute right-0 mt-2 w-80 bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E5E5EA] dark:border-[#2C2C2E] rounded-2xl shadow-xl p-4.5 z-50 text-xs animate-scaleUp"
             id="portability_dropdown"
           >
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-150 dark:border-neutral-800">
-              <span className="font-extrabold tracking-tight dark:text-white flex items-center gap-1">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <div className="flex items-center justify-between mb-3.5 pb-2.5 border-b border-[#F2F2F7] dark:border-[#2C2C2E]">
+              <span className="font-semibold text-[#1D1D1F] dark:text-[#FFFFFF] flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-[#34C759]" />
                 SJ Security Desk
               </span>
-              <span className="text-[9px] bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold px-1.5 py-0.5 rounded">
+              <span className="text-[9px] bg-[#34C759]/10 text-[#34C759] font-semibold px-2 py-0.5 rounded-md">
                 OFFLINE ONLY
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {/* Informative Security Callout */}
-              <div className="bg-blue-50/50 dark:bg-blue-950/20 p-2.5 rounded-xl border border-blue-100/50 dark:border-blue-900/30 text-gray-600 dark:text-neutral-450 leading-normal">
-                <p className="font-semibold text-gray-800 dark:text-neutral-300 mb-0.5 flex items-center gap-1">
+              <div className="bg-[#007AFF]/5 dark:bg-[#007AFF]/10 p-3 rounded-xl border border-transparent text-[#1D1D1F] dark:text-[#F5F5F7] leading-relaxed">
+                <p className="font-semibold text-[#007AFF] mb-0.5 flex items-center gap-1">
                   On-Device Storage Active
                 </p>
-                100% of your data is compiled directly in your browser's hardware storage sandbox. No external tracking, no login, entirely private and free forever.
+                <span className="text-[11px] text-[#8E8E93] dark:text-[#8E8E93]">
+                  100% of your data is compiled directly in your browser's hardware storage sandbox. No external tracking, no login, entirely private and free forever.
+                </span>
               </div>
 
               {/* Data Operations */}
               <div className="space-y-2">
                 <button
                   onClick={handleExportJSON}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-neutral-850 dark:hover:bg-neutral-800 rounded-xl transition font-semibold text-gray-700 dark:text-neutral-250 border border-transparent dark:border-neutral-800"
+                  className="w-full flex items-center justify-between px-3 py-2.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] rounded-lg transition-all font-semibold text-[#1D1D1F] dark:text-[#FFFFFF] border border-transparent cursor-pointer active:scale-98"
                   id="btn_export_json"
                 >
                   <span className="flex items-center gap-2">
-                    <Download className="w-3.5 h-3.5 text-blue-500" />
+                    <Download className="w-3.5 h-3.5 text-[#007AFF]" />
                     Download JSON Database Backup
                   </span>
                 </button>
 
-                <label className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-neutral-850 dark:hover:bg-neutral-800 rounded-xl transition cursor-pointer font-semibold text-gray-700 dark:text-neutral-250 border border-transparent dark:border-neutral-800">
+                <label className="w-full flex items-center justify-between px-3 py-2.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] rounded-lg transition-all cursor-pointer font-semibold text-[#1D1D1F] dark:text-[#FFFFFF] border border-transparent active:scale-98">
                   <span className="flex items-center gap-2">
-                    <Upload className="w-3.5 h-3.5 text-amber-500" />
+                    <Upload className="w-3.5 h-3.5 text-[#FF9500]" />
                     Upload JSON Database Backup
                   </span>
                   <input
@@ -236,9 +238,9 @@ export function BackupPortability({
                   />
                 </label>
 
-                <label className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-neutral-850 dark:hover:bg-neutral-800 rounded-xl transition cursor-pointer font-semibold text-gray-700 dark:text-neutral-250 border border-transparent dark:border-neutral-800">
+                <label className="w-full flex items-center justify-between px-3 py-2.5 bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] rounded-lg transition-all cursor-pointer font-semibold text-[#1D1D1F] dark:text-[#FFFFFF] border border-transparent active:scale-98">
                   <span className="flex items-center gap-2">
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" />
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-[#34C759]" />
                     Import Contacts from CSV File
                   </span>
                   <input
@@ -252,9 +254,9 @@ export function BackupPortability({
               </div>
 
               {/* Formatting CSV Info */}
-              <div className="text-[10px] text-gray-400 dark:text-neutral-500 font-medium leading-relaxed bg-gray-50/20 p-2 rounded-lg border border-black/5">
-                <span className="font-bold uppercase tracking-wider block mb-0.5">CSV Schema Standard:</span>
-                First row must contain columns like: <code className="text-gray-600 dark:text-gray-300 font-mono">name</code>, <code className="text-gray-600 dark:text-gray-300 font-mono">company</code>, <code className="text-gray-600 dark:text-gray-300 font-mono">phone</code>, <code className="text-gray-600 dark:text-gray-300 font-mono">email</code>, <code className="text-gray-600 dark:text-gray-300 font-mono">city</code>
+              <div className="text-[10px] text-[#8E8E93] dark:text-[#8E8E93] font-medium leading-relaxed bg-[#F2F2F7]/50 dark:bg-[#2C2C2E]/30 p-2.5 rounded-lg border border-[#F2F2F7] dark:border-[#2C2C2E]">
+                <span className="font-semibold text-[#1D1D1F] dark:text-[#FFFFFF] uppercase tracking-wider block mb-0.5">CSV Schema Standard:</span>
+                First row must contain columns like: <code className="text-[#007AFF] dark:text-[#007AFF] font-mono">name</code>, <code className="text-[#007AFF] dark:text-[#007AFF] font-mono">company</code>, <code className="text-[#007AFF] dark:text-[#007AFF] font-mono">phone</code>
               </div>
             </div>
           </div>
@@ -263,29 +265,29 @@ export function BackupPortability({
 
       {/* Elegant HUD Notifications */}
       {showNotification && (
-        <div className="fixed bottom-4 right-4 z-50 bg-black/90 text-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-2.5 animate-bounce text-xs font-semibold max-w-sm border border-neutral-800/80">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#1C1C1E]/95 dark:bg-[#000000]/90 text-white rounded-xl shadow-xl px-4.5 py-3.5 flex items-center gap-3 animate-bounce text-xs font-semibold max-w-sm border border-[#2C2C2E] backdrop-blur-xl">
           {showNotification === 'export' && (
             <>
-              <Check className="w-4 h-4 text-emerald-400" />
+              <Check className="w-4 h-4 text-[#34C759]" />
               <span>Database downloaded successfully. Backup secure on disk!</span>
             </>
           )}
           {showNotification === 'import' && (
             <>
-              <Sparkles className="w-4 h-4 text-amber-400" />
+              <Sparkles className="w-4 h-4 text-[#FF9500]" />
               <span>Full database restoration complete. App synchronized!</span>
             </>
           )}
           {showNotification === 'csv' && (
             <>
-              <Check className="w-4 h-4 text-emerald-400" />
+              <Check className="w-4 h-4 text-[#34C759]" />
               <span>Contacts CSV successfully parsed and appended to directory.</span>
             </>
           )}
           {showNotification === 'error' && (
             <>
-              <AlertTriangle className="w-4 h-4 text-red-400" />
-              <span className="text-red-300">{errorMessage}</span>
+              <AlertTriangle className="w-4 h-4 text-[#FF3B30]" />
+              <span className="text-[#FF453A]">{errorMessage}</span>
             </>
           )}
         </div>

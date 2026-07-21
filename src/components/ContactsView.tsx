@@ -217,44 +217,44 @@ export function ContactsView({
   return (
     <div id="contacts_and_timeline_module" className="grid grid-cols-1 md:grid-cols-12 gap-5 h-full items-stretch">
       {/* 1. Directory List Panel (5 Cols) */}
-      <div className={`md:col-span-5 bg-white dark:bg-neutral-900 border border-gray-150 dark:border-neutral-800 rounded-2xl p-3.5 flex flex-col h-full overflow-hidden ${mobileView === 'list' ? 'flex' : 'hidden md:flex'}`}>
+      <div className={`md:col-span-5 bg-[#FFFFFF] dark:bg-[#1C1C1E] border border-[#E5E5EA] dark:border-[#2C2C2E] rounded-2xl p-4 flex flex-col h-full overflow-hidden shadow-xs ${mobileView === 'list' ? 'flex' : 'hidden md:flex'}`}>
         {/* Directory Controls */}
-        <div className="space-y-2.5 shrink-0 mb-3">
+        <div className="space-y-3 shrink-0 mb-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-sm dark:text-white flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-blue-500" />
+            <h3 className="font-semibold text-sm text-[#1D1D1F] dark:text-[#FFFFFF] flex items-center gap-2">
+              <Users className="w-4 h-4 text-[#007AFF]" />
               Partners Directory
             </h3>
             <button
               onClick={() => setIsAddingContact(!isAddingContact)}
-              className="flex items-center gap-1 px-2 py-1 rounded-xl bg-gray-900 hover:bg-black dark:bg-neutral-800 dark:hover:bg-neutral-750 text-[10px] font-bold text-white transition active:scale-95"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#007AFF] hover:bg-[#0066CC] dark:bg-[#007AFF] dark:hover:bg-[#0066CC] text-[10px] font-semibold text-white transition-all active:scale-95 cursor-pointer"
               id="btn_add_contact_toggle"
             >
-              <Plus className="w-3 h-3" /> Add Lead
+              <Plus className="w-3.5 h-3.5" /> Add Lead
             </button>
           </div>
 
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8E8E93]" />
             <input
               type="text"
               placeholder="Search by name, company, city..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-gray-50 dark:bg-neutral-850 text-xs rounded-xl focus:outline-hidden border border-transparent dark:border-neutral-800 focus:bg-white dark:focus:bg-neutral-900 dark:text-white"
+              className="w-full pl-8 pr-3 py-1.5 bg-[#F2F2F7] dark:bg-[#2C2C2E] text-xs rounded-lg focus:outline-hidden border border-transparent dark:border-transparent focus:bg-[#E5E5EA] dark:focus:bg-[#3A3A3C] text-[#1D1D1F] dark:text-[#FFFFFF] placeholder-[#8E8E93] font-medium"
             />
           </div>
 
-          {/* Quick Category / Stage Filter pills */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-[10px] font-bold">
+          {/* Quick Category / Stage Filter pills (Sleek horizontal segment control) */}
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-[10px] font-medium">
             {['all', 'Lead', 'Need Drawing', 'Quotation Sent', 'Order Expected', 'Payment Follow-up'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStageFilter(st)}
-                className={`px-2 py-1 rounded-lg transition whitespace-nowrap ${
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                   stageFilter === st
-                    ? 'bg-blue-500 text-white shadow-xs'
-                    : 'bg-gray-50 hover:bg-gray-100 dark:bg-neutral-850 text-gray-550 dark:text-neutral-400'
+                    ? 'bg-[#007AFF] text-white shadow-xs font-semibold'
+                    : 'bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#8E8E93] hover:text-[#1D1D1F] dark:hover:text-white'
                 }`}
               >
                 {st === 'all' ? 'All Stages' : st}
@@ -406,29 +406,37 @@ export function ContactsView({
                     setDossierText2('');
                     setDossierSelect('');
                   }}
-                  className={`p-3 rounded-xl border transition cursor-pointer flex items-center justify-between gap-2.5 ${
+                  className={`p-3 rounded-xl transition-all cursor-pointer flex items-center justify-between gap-2.5 border border-transparent active:scale-98 ${
                     isSelected
-                      ? 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/40 text-blue-900 dark:text-white'
-                      : 'bg-gray-50/50 dark:bg-neutral-850/50 hover:bg-gray-50 dark:hover:bg-neutral-800 border-gray-150/40 dark:border-neutral-800/45 text-gray-800 dark:text-neutral-350'
+                      ? 'bg-[#007AFF] text-white shadow-sm'
+                      : 'bg-[#F2F2F7]/50 dark:bg-[#2C2C2E]/40 hover:bg-[#F2F2F7] dark:hover:bg-[#2C2C2E] text-[#1D1D1F] dark:text-[#F5F5F7]'
                   }`}
                   id={`directory_item_${c.id}`}
                 >
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-xs font-bold truncate">{c.name}</h4>
-                    <p className="text-[10px] text-gray-500 dark:text-neutral-400 font-semibold truncate">
+                    <h4 className="text-xs font-semibold truncate">{c.name}</h4>
+                    <p className={`text-[10px] font-medium truncate mt-0.5 ${isSelected ? 'text-white/80' : 'text-[#8E8E93]'}`}>
                       {c.company} • {c.city || 'National'}
                     </p>
-                    <span className="inline-block text-[9px] bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-neutral-350 px-1.5 py-0.2 rounded font-bold uppercase tracking-wider mt-1.5">
+                    <span className={`inline-block text-[9px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider mt-1.5 ${
+                      isSelected 
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-[#E3E3E9] dark:bg-[#3A3A3C] text-[#1D1D1F] dark:text-[#F5F5F7]'
+                    }`}>
                       {c.stage}
                     </span>
                   </div>
 
                   <div className="shrink-0 flex flex-col items-end gap-1">
-                    <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full border ${getHeatColor(c.heatScore)} flex items-center gap-0.5`}>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border flex items-center gap-0.5 ${
+                      isSelected
+                        ? 'text-white border-white/30 bg-white/10'
+                        : getHeatColor(c.heatScore)
+                    }`}>
                       <Flame className="w-3 h-3 fill-current" />
                       {c.heatScore}
                     </span>
-                    <span className="text-[9px] font-semibold text-gray-400 dark:text-neutral-500">
+                    <span className={`text-[9px] font-semibold ${isSelected ? 'text-white/70' : 'text-[#8E8E93]'}`}>
                       {c.interactionCount} touches
                     </span>
                   </div>

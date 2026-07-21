@@ -45,13 +45,14 @@ const COLOR_PRESETS = [
 
 export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
   // Navigation Tabs
-  const [tab, setTab] = useState<'dashboard' | 'employees' | 'tasks' | 'eod_logs'>('dashboard');
+  const [tab, setTab] = useState<'dashboard' | 'employees' | 'tasks' | 'eod_logs' | 'security_logs'>('dashboard');
 
   // Core organization list loaded dynamically
   const [employeesList, setEmployeesList] = useState<UserProfile[]>([]);
   const [userStats, setUserStats] = useState<any[]>([]);
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [allReviews, setAllReviews] = useState<any[]>([]);
+  const [securityLogs, setSecurityLogs] = useState<any[]>([]);
 
   // EOD reviews edit states
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
@@ -140,6 +141,10 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
     });
     flatReviews.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
     setAllReviews(flatReviews);
+
+    // Load passcode and security logs
+    const savedLogs = localStorage.getItem('sj_os_security_logs');
+    setSecurityLogs(savedLogs ? JSON.parse(savedLogs) : []);
   };
 
   useEffect(() => {
@@ -465,6 +470,17 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
           >
             <FileText className="w-3.5 h-3.5" />
             EOD Logs Audit
+          </button>
+          <button
+            onClick={() => setTab('security_logs')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              tab === 'security_logs'
+                ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                : 'text-gray-500 hover:text-[#1D1D1F]'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            Passcode & Access Logs
           </button>
         </div>
       </div>
@@ -1132,6 +1148,113 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* TAB E: PASSCODE MATRIX & AUDIT LOGS */}
+      {tab === 'security_logs' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left: Credentials Matrix (Requirement 2) */}
+          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-150 p-5 shadow-xs space-y-4">
+            <div>
+              <h2 className="text-sm font-bold text-[#1D1D1F] flex items-center gap-1.5">
+                <Crown className="w-4 h-4 text-amber-500" />
+                Organization Passcode Matrix
+              </h2>
+              <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5">
+                Secure reference ledger of all employee security PIN codes. Only accessible under this administrative terminal.
+              </p>
+            </div>
+
+            <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-100">
+              {employeesList.map((emp) => (
+                <div key={emp.id} className="p-3.5 flex items-center justify-between text-xs hover:bg-gray-50/50 transition">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`h-8 w-8 rounded-lg bg-linear-to-br ${emp.color} text-white font-extrabold text-[10px] flex items-center justify-center`}>
+                      {emp.initials}
+                    </div>
+                    <div>
+                      <span className="block font-bold text-gray-800">{emp.name}</span>
+                      <span className="block text-[9px] text-[#8E8E93] uppercase font-bold tracking-wider">{emp.role}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <span className="inline-block bg-[#007AFF]/10 text-[#007AFF] font-mono font-bold px-3 py-1 rounded-lg text-xs tracking-wider border border-[#007AFF]/20">
+                      {emp.pin}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-3 bg-blue-50/30 border border-blue-100/50 rounded-xl">
+              <span className="block text-[10px] font-bold text-[#007AFF] uppercase tracking-wider mb-1">💡 SECURITY RULES NOTICE</span>
+              <p className="text-[10px] text-[#8E8E93] leading-relaxed font-medium">
+                Admin credentials (PIN: <strong className="text-[#007AFF]">2710</strong>) grant full root command oversight. Staff passcodes can be configured anytime inside the <strong>Roster Manager</strong> tab.
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Security Handshake Logs */}
+          <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-150 p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-[#1D1D1F]">Login Access Audit Trail</h2>
+                <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5">
+                  Real-time security logs recording all passcode authentication handshakes.
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (confirm('Permanently wipe all login security audit trails? This action is irreversible.')) {
+                    localStorage.setItem('sj_os_security_logs', JSON.stringify([]));
+                    setSecurityLogs([]);
+                    onToast('Security logs successfully cleared.');
+                  }
+                }}
+                className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-extrabold text-[10px] rounded-lg transition cursor-pointer uppercase tracking-wider"
+              >
+                Clear Audit Trail
+              </button>
+            </div>
+
+            {securityLogs.length === 0 ? (
+              <div className="p-12 text-center text-gray-400 border border-dashed border-gray-200 rounded-xl text-xs font-medium">
+                No security login attempts logged. Start typing passcode on home screen to trigger log reports.
+              </div>
+            ) : (
+              <div className="border border-gray-100 rounded-xl divide-y divide-gray-100 max-h-[380px] overflow-y-auto scrollbar-thin">
+                {securityLogs.map((log) => (
+                  <div key={log.id} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase border ${
+                          log.result === 'Success' 
+                            ? 'bg-emerald-50 text-emerald-600 border-emerald-200' 
+                            : 'bg-red-50 text-red-600 border-red-200'
+                        }`}>
+                          {log.result === 'Success' ? 'GRANTED' : 'DENIED'}
+                        </span>
+                        <span className="font-mono text-[9px] text-[#8E8E93] font-semibold">
+                          PIN INPUT: {log.pinEntered}
+                        </span>
+                      </div>
+                      
+                      <div className="text-gray-700 font-medium text-[11px]">
+                        {log.resolvedUser} <span className="text-gray-400">({log.resolvedRole})</span>
+                      </div>
+                    </div>
+
+                    <div className="text-left sm:text-right text-[10px] font-mono text-gray-400">
+                      {new Date(log.timestamp).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

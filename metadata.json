@@ -1,0 +1,6 @@
+{
+  "name": "SJ OS",
+  "description": "An elegant, offline-first Executive Work Operating System that automates scheduling, contact timelines, and daily workloads.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

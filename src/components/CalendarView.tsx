@@ -21,6 +21,8 @@ import {
   FileCheck2,
   ListFilter,
   Check,
+  Video,
+  ExternalLink,
 } from 'lucide-react';
 
 interface CalendarViewProps {
@@ -44,6 +46,8 @@ export function CalendarView({
 }: CalendarViewProps) {
   const [filterType, setFilterType] = useState<string>('all');
   const [isAddingEvent, setIsAddingEvent] = useState(false);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [joinCodeInput, setJoinCodeInput] = useState('');
   
   // Local form for custom events
   const [newTitle, setNewTitle] = useState('');
@@ -149,6 +153,15 @@ export function CalendarView({
           </div>
           <div className="flex items-center gap-1.5">
             <button
+              onClick={() => setIsJoinModalOpen(!isJoinModalOpen)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#34C759] hover:bg-emerald-600 text-white text-[10px] font-semibold transition-all active:scale-95 cursor-pointer shadow-xs"
+              title="Join or launch a Google Meet session"
+              id="btn_join_meeting_top"
+            >
+              <Video className="w-3 h-3" />
+              Join Meeting
+            </button>
+            <button
               onClick={() => onRebalanceDay(selectedDate)}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#F2F2F7] hover:bg-[#E5E5EA] dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-[10px] font-semibold text-[#1D1D1F] dark:text-[#FFFFFF] transition-all active:scale-95 cursor-pointer"
               title="Alternates mental heavy items with breaks to balance energy"
@@ -166,6 +179,68 @@ export function CalendarView({
             </button>
           </div>
         </div>
+
+        {/* Join Google Meet Drawer Banner */}
+        {isJoinModalOpen && (
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 p-3 rounded-xl space-y-2 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-extrabold text-[#34C759] uppercase tracking-wider flex items-center gap-1">
+                <Video className="w-3.5 h-3.5" /> Join Google Meet Session
+              </span>
+              <button
+                onClick={() => setIsJoinModalOpen(false)}
+                className="text-xs text-gray-400 hover:text-gray-600 font-bold cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                placeholder="Paste Meet URL or Code (e.g. abc-defg-hij)"
+                value={joinCodeInput}
+                onChange={(e) => setJoinCodeInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    let url = joinCodeInput.trim();
+                    if (!url) {
+                      url = 'https://meet.google.com/new';
+                    } else if (!url.startsWith('http')) {
+                      url = `https://meet.google.com/${url}`;
+                    }
+                    window.open(url, '_blank');
+                  }
+                }}
+                className="flex-1 px-3 py-1.5 bg-white dark:bg-neutral-900 border border-emerald-300 dark:border-emerald-700 rounded-lg text-xs font-mono text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#34C759]"
+              />
+              <button
+                onClick={() => {
+                  let url = joinCodeInput.trim();
+                  if (!url) {
+                    url = 'https://meet.google.com/new';
+                  } else if (!url.startsWith('http')) {
+                    url = `https://meet.google.com/${url}`;
+                  }
+                  window.open(url, '_blank');
+                }}
+                className="px-3 py-1.5 bg-[#34C759] hover:bg-emerald-600 text-white font-bold text-xs rounded-lg transition active:scale-95 cursor-pointer flex items-center gap-1 shrink-0 shadow-xs"
+              >
+                <ExternalLink className="w-3 h-3" /> Join Now
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between text-[10px] text-emerald-800 dark:text-emerald-300 font-medium">
+              <span>Or start an instant empty room:</span>
+              <button
+                onClick={() => window.open('https://meet.google.com/new', '_blank')}
+                className="font-bold underline hover:text-emerald-600 cursor-pointer"
+              >
+                Start Instant Google Meet →
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Working Days Row (Apple Calendar Layout Style) */}
         <div className="grid grid-cols-5 gap-1 bg-[#E3E3E9]/55 dark:bg-[#1C1C1E]/60 p-0.5 rounded-xl border border-transparent dark:border-[#2C2C2E]">
@@ -395,7 +470,20 @@ export function CalendarView({
                       {item.title}
                     </h4>
 
-                    <div className="flex items-center gap-3.5 mt-1">
+                    <div className="flex flex-wrap items-center gap-3 mt-1.5">
+                      {(item.type === 'meeting' || item.type === 'call' || item.meetUrl || item.title.toLowerCase().includes('meet') || item.title.toLowerCase().includes('call')) && (
+                        <button
+                          onClick={() => {
+                            const url = item.meetUrl || 'https://meet.google.com/new';
+                            window.open(url, '_blank');
+                          }}
+                          className="text-[10px] bg-[#34C759] hover:bg-emerald-600 text-white font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1 transition active:scale-95 cursor-pointer shadow-xs"
+                          title="Join live Google Meet call"
+                        >
+                          <Video className="w-3 h-3" />
+                          Join Google Meet
+                        </button>
+                      )}
                       {item.contactId && (
                         <button
                           onClick={() => onSelectContact(item.contactId!)}

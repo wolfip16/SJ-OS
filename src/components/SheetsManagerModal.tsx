@@ -17,7 +17,10 @@ import {
   ExternalLink,
   Edit2,
   Save,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
+import { appendDirectSheetRow } from '../lib/workspaceAuth';
 
 interface SheetDoc {
   id: string;
@@ -116,11 +119,15 @@ export function SheetsManagerModal({ isOpen, onClose }: SheetsManagerModalProps)
     setTimeout(() => setToastNotice(null), 3000);
   };
 
-  const handleAddRow = () => {
+  const handleAddRow = async () => {
     if (!currentSheet) return;
     const newRow: Record<string, string> = {};
+    const valuesArray: string[] = [];
+
     currentSheet.columns.forEach((col, idx) => {
-      newRow[col] = idx === 0 ? `New Record ${currentSheet.data.length + 1}` : '-';
+      const val = idx === 0 ? `New Record ${currentSheet.data.length + 1}` : '-';
+      newRow[col] = val;
+      valuesArray.push(val);
     });
 
     const updatedSheet = {
@@ -131,6 +138,17 @@ export function SheetsManagerModal({ isOpen, onClose }: SheetsManagerModalProps)
     };
 
     setSheets(sheets.map((s) => (s.id === currentSheet.id ? updatedSheet : s)));
+
+    // Optional Google Sheets API sync if spreadsheet ID present
+    if (currentSheet.id.startsWith('1')) {
+      try {
+        await appendDirectSheetRow(currentSheet.id, 'Sheet1!A1', valuesArray);
+        setToastNotice(`Appended row directly to Google Sheets API!`);
+        setTimeout(() => setToastNotice(null), 3000);
+      } catch (err: any) {
+        console.warn('Google Sheets API append notice:', err?.message);
+      }
+    }
   };
 
   const handleStartCellEdit = (rowIdx: number, colKey: string, currentVal: string) => {

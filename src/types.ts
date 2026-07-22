@@ -79,6 +79,8 @@ export interface CalendarItem {
   priority: 'high' | 'medium' | 'low';
   completed: boolean;
   overdueRescheduled?: boolean;
+  meetUrl?: string;
+  attendees?: string[];
 }
 
 export interface DailyReview {

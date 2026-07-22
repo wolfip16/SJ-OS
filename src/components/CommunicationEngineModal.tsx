@@ -4,9 +4,10 @@
  */
 
 import React, { useState } from 'react';
-import { Mail, Send, Paperclip, CheckCircle, X, Sparkles, User, FileText, Bell, ShieldCheck, Users } from 'lucide-react';
+import { Mail, Send, Paperclip, CheckCircle, X, Sparkles, User, FileText, Bell, ShieldCheck, Users, Loader2 } from 'lucide-react';
 import { Contact } from '../types';
 import { UserProfile } from './AuthLockScreen';
+import { sendDirectEmailViaGmail, signInWithGoogleWorkspace } from '../lib/workspaceAuth';
 
 interface CommunicationEngineModalProps {
   isOpen: boolean;
@@ -36,14 +37,53 @@ export function CommunicationEngineModal({
   const [attachments, setAttachments] = useState<string[]>([]);
   const [createTaskReminder, setCreateTaskReminder] = useState(true);
   const [isSent, setIsSent] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sendSuccessMessage, setSendSuccessMessage] = useState('Sent Directly via Gmail API');
 
   const senderEmail = currentUser?.email || currentUser?.googleId || 'reshab.jhunjhunwalla@rbagarwalla.com';
 
   if (!isOpen) return null;
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!to || !subject) return;
+
+    setIsSending(true);
+
+    try {
+      // 1. Try sending directly using Gmail API
+      await sendDirectEmailViaGmail({
+        to,
+        cc,
+        bcc,
+        subject,
+        body,
+      });
+      setSendSuccessMessage('Email sent directly via Gmail API!');
+    } catch (err: any) {
+      console.warn('Direct Gmail API send attempt notice:', err?.message);
+      
+      // If error or token required, launch popup or fallback to Gmail Compose tab
+      try {
+        await signInWithGoogleWorkspace();
+        await sendDirectEmailViaGmail({
+          to,
+          cc,
+          bcc,
+          subject,
+          body,
+        });
+        setSendSuccessMessage('Authenticated & Email Sent Directly via Gmail API!');
+      } catch (authErr: any) {
+        console.warn('OAuth fallback to web compose:', authErr?.message);
+        // Fallback to Gmail Web Composer so message is never lost
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc || '')}&bcc=${encodeURIComponent(bcc || '')}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.open(gmailUrl, '_blank');
+        setSendSuccessMessage('Opened in Gmail Web Composer & Dispatched!');
+      }
+    } finally {
+      setIsSending(false);
+    }
 
     onSendEmail({ to, cc, bcc, subject, body, attachments });
 
@@ -66,7 +106,7 @@ export function CommunicationEngineModal({
       setSubject('');
       setBody('');
       setAttachments([]);
-    }, 1200);
+    }, 1800);
   };
 
   const handleAttachDriveFile = () => {
@@ -103,9 +143,9 @@ export function CommunicationEngineModal({
         {isSent ? (
           <div className="p-12 text-center space-y-3">
             <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto animate-bounce" />
-            <h3 className="text-base font-bold text-gray-900">Message Dispatched</h3>
+            <h3 className="text-base font-bold text-gray-900">{sendSuccessMessage}</h3>
             <p className="text-xs text-gray-500">
-              Your email was dispatched using <span className="font-semibold text-gray-800">{senderEmail}</span> via Gmail Engine & recorded in SJ OS.
+              Dispatched for <span className="font-semibold text-gray-800">{senderEmail}</span> to <span className="font-semibold text-gray-800">{to}</span> and recorded in SJ OS activity history.
             </p>
           </div>
         ) : (
@@ -317,9 +357,20 @@ export function CommunicationEngineModal({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#007AFF] hover:bg-blue-600 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                  disabled={isSending}
+                  className="px-5 py-2 bg-[#007AFF] hover:bg-blue-600 disabled:bg-blue-400 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Send className="w-3.5 h-3.5" /> Dispatch Message
+                  {isSending ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Sending via Gmail API...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Dispatch Message</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

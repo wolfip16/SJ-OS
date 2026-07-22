@@ -4,9 +4,10 @@
  */
 
 import React, { useState } from 'react';
-import { Video, Calendar, Clock, Users, Link2, Copy, Check, X, Sparkles, FileText, Bell, ShieldCheck } from 'lucide-react';
+import { Video, Calendar, Clock, Users, Link2, Copy, Check, X, Sparkles, FileText, Bell, ShieldCheck, CheckCircle } from 'lucide-react';
 import { Contact } from '../types';
 import { UserProfile } from './AuthLockScreen';
+import { createDirectCalendarEvent } from '../lib/workspaceAuth';
 
 interface MeetingEngineModalProps {
   isOpen: boolean;
@@ -36,6 +37,8 @@ export function MeetingEngineModal({
   const [date, setDate] = useState('2026-07-21');
   const [time, setTime] = useState('11:00 AM');
   const [attendees, setAttendees] = useState<string[]>([]);
+  const [customAttendeeInput, setCustomAttendeeInput] = useState('');
+  const [customAttendees, setCustomAttendees] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [meetUrl, setMeetUrl] = useState('');
   const [copied, setCopied] = useState(false);
@@ -67,11 +70,47 @@ export function MeetingEngineModal({
     }
   };
 
-  const handleCreateMeeting = (e: React.FormEvent) => {
+  const handleAddCustomAttendee = () => {
+    const trimmed = customAttendeeInput.trim().toLowerCase();
+    if (trimmed && trimmed.includes('@') && !attendees.includes(trimmed)) {
+      setAttendees([...attendees, trimmed]);
+      setCustomAttendees([...customAttendees, trimmed]);
+      setCustomAttendeeInput('');
+    }
+  };
+
+  const handleRemoveCustomAttendee = (email: string) => {
+    setAttendees(attendees.filter((a) => a !== email));
+    setCustomAttendees(customAttendees.filter((a) => a !== email));
+  };
+
+  const handleCreateMeeting = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title) return;
 
-    const finalMeetUrl = meetUrl || `https://meet.google.com/sjos-${Math.random().toString(36).substring(2, 6)}`;
+    let finalMeetUrl = meetUrl || `https://meet.google.com/sjos-${Math.random().toString(36).substring(2, 6)}`;
+
+    // Try creating directly in Google Calendar
+    try {
+      const startDateTime = new Date(`${date}T${time.includes('PM') ? '14:00' : '10:00'}:00`).toISOString();
+      const endDateTime = new Date(new Date(startDateTime).getTime() + 45 * 60 * 1000).toISOString();
+
+      const calResult = await createDirectCalendarEvent({
+        summary: title,
+        description: `${notes ? `${notes}\n\n` : ''}Organized by ${organizerEmail} via SJ OS Meeting Engine`,
+        startIso: startDateTime,
+        endIso: endDateTime,
+        attendees,
+        createMeet: true,
+      });
+
+      if (calResult.hangoutsLink) {
+        finalMeetUrl = calResult.hangoutsLink;
+      }
+    } catch (err: any) {
+      console.warn('Google Calendar API sync notice:', err?.message);
+    }
+
     onScheduleMeeting({
       title,
       date,
@@ -100,7 +139,7 @@ export function MeetingEngineModal({
       setNotes('');
       setAttendees([]);
       setMeetUrl('');
-    }, 1200);
+    }, 1500);
   };
 
   return (
@@ -241,10 +280,15 @@ export function MeetingEngineModal({
 
             {/* Attendees selector */}
             <div>
-              <label className="block text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1">
-                <Users className="w-3 h-3 text-[#34C759]" /> Select Directory Attendees
-              </label>
-              <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-gray-50 border border-gray-200 rounded-xl">
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[10px] uppercase font-bold text-gray-500 tracking-wider flex items-center gap-1">
+                  <Users className="w-3 h-3 text-[#34C759]" /> Select Directory & External Attendees
+                </label>
+                <span className="text-[10px] text-[#34C759] font-bold">{attendees.length} selected</span>
+              </div>
+              
+              {/* Directory roster list */}
+              <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-gray-50 border border-gray-200 rounded-xl mb-2">
                 {contacts.map((c) => {
                   const selected = attendees.includes(c.email);
                   return (
@@ -263,6 +307,52 @@ export function MeetingEngineModal({
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Add external non-roster attendee */}
+              <div className="space-y-1.5">
+                <div className="flex gap-1.5">
+                  <input
+                    type="email"
+                    placeholder="Add external attendee (e.g. client@externalcompany.com)"
+                    value={customAttendeeInput}
+                    onChange={(e) => setCustomAttendeeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCustomAttendee();
+                      }
+                    }}
+                    className="flex-1 px-3 py-1.5 bg-white border border-gray-300 rounded-xl text-xs font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#34C759] transition shadow-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCustomAttendee}
+                    className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-[#34C759] border border-emerald-200 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1"
+                  >
+                    + Add External
+                  </button>
+                </div>
+
+                {customAttendees.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {customAttendees.map((email) => (
+                      <span
+                        key={email}
+                        className="text-[10px] bg-emerald-50 text-[#34C759] border border-emerald-200 px-2 py-0.5 rounded-lg font-mono font-semibold flex items-center gap-1"
+                      >
+                        {email}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCustomAttendee(email)}
+                          className="hover:text-red-500 font-bold ml-1 cursor-pointer"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

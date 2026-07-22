@@ -1398,6 +1398,8 @@ export default function App() {
             priority: 'high',
             completed: false,
             date,
+            meetUrl,
+            attendees,
           };
           setCalendarItems((prev) => [...prev, newItem]);
 

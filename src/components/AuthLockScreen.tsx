@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { Shield, Lock, Eye, EyeOff, Terminal, Clock, Radio, Activity, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Shield, Lock, Eye, EyeOff, Terminal, Clock, Radio, Activity, CheckCircle, AlertCircle, Database } from 'lucide-react';
+import { logSecurityAccessToFirebase } from '../lib/firebaseSync';
 
 export interface UserProfile {
   id: string;
@@ -82,6 +83,9 @@ export function logSecurityAccess(pin: string, result: 'Success' | 'Denied', use
   } catch (e) {
     // ignore logging errors
   }
+
+  // Also sync to Firebase Firestore
+  logSecurityAccessToFirebase(pin, result, user);
 }
 
 interface AuthLockScreenProps {
@@ -100,7 +104,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
-      setTimeStr(now.toLocaleTimeString('en-US', { hour12: false }));
+      setTimeStr(now.toLocaleTimeString('en-US', { hour12: true }));
       setDateStr(now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }));
     };
     updateClock();
@@ -108,55 +112,64 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Keyboard event handler
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input for seamless typing
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  // Keyboard shortcut listener for Escape key only
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (successUser) return; // ignore input on redirect
-      
-      if (e.key >= '0' && e.key <= '9') {
-        handleKeyPress(e.key);
-      } else if (e.key === 'Backspace') {
-        handleBackspace();
+      if (successUser) return;
+      if (e.key === 'Escape') {
+        setPin('');
+        setError(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [pin, successUser]);
+  }, [successUser]);
+
+  const processPinChange = (val: string) => {
+    if (successUser) return;
+    setError(null);
+    const cleanVal = val.replace(/\D/g, '').slice(0, 4);
+    setPin(cleanVal);
+
+    if (cleanVal.length === 4) {
+      const usersList = getStoredOrgUsers();
+      const matchedUser = usersList.find((u) => u.pin === cleanVal);
+
+      if (matchedUser) {
+        logSecurityAccess(cleanVal, 'Success', matchedUser);
+        setSuccessUser(matchedUser);
+        setTimeout(() => {
+          onAuthenticate(matchedUser);
+        }, 800);
+      } else {
+        logSecurityAccess(cleanVal, 'Denied');
+        setTimeout(() => {
+          setError('Access Denied: Invalid Security Signature');
+          setPin('');
+        }, 150);
+      }
+    }
+  };
 
   const handleKeyPress = (num: string) => {
     if (successUser) return;
-    setError(null);
-    
     if (pin.length < 4) {
-      const newPin = pin + num;
-      setPin(newPin);
-      
-      // Auto-validate once 4 digits are completed
-      if (newPin.length === 4) {
-        const usersList = getStoredOrgUsers();
-        const matchedUser = usersList.find(u => u.pin === newPin);
-        
-        if (matchedUser) {
-          logSecurityAccess(newPin, 'Success', matchedUser);
-          setSuccessUser(matchedUser);
-          setTimeout(() => {
-            onAuthenticate(matchedUser);
-          }, 800);
-        } else {
-          logSecurityAccess(newPin, 'Denied');
-          setTimeout(() => {
-            setError('Access Denied: Invalid Security Signature');
-            setPin('');
-          }, 150);
-        }
-      }
+      processPinChange(pin + num);
     }
   };
 
   const handleBackspace = () => {
     if (successUser) return;
-    setPin((prev) => prev.slice(0, -1));
-    setError(null);
+    processPinChange(pin.slice(0, -1));
   };
 
   return (
@@ -223,16 +236,35 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
             </div>
 
             <div className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1">
-              <div className="text-[9px] text-[#8E8E93] uppercase font-bold tracking-wider">Secure Audit Handshake</div>
+              <div className="text-[9px] text-[#8E8E93] uppercase font-bold tracking-wider flex items-center justify-between">
+                <span>Secure Audit Handshake</span>
+                <span className="text-[#0A84FF] font-bold flex items-center gap-1">
+                  <Database className="w-3 h-3" /> Firebase Enclave Active
+                </span>
+              </div>
               <div className="text-[10px] text-emerald-400 font-bold flex items-center gap-1.5">
-                <Activity className="w-3 h-3 text-emerald-400 animate-pulse" /> Connection verified. Standby.
+                <Activity className="w-3 h-3 text-emerald-400 animate-pulse" /> Cloud database synced. Keyboard access ready.
               </div>
             </div>
           </div>
         </div>
 
         {/* Right Side: Passcode Core Terminal */}
-        <div className="lg:col-span-7 p-8 md:p-12 flex flex-col justify-center items-center relative">
+        <div className="lg:col-span-7 p-8 md:p-12 flex flex-col justify-center items-center relative" onClick={() => inputRef.current?.focus()}>
+          
+          {/* Invisible input for seamless physical & touch keyboard typing */}
+          <input
+            ref={inputRef}
+            type="password"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={4}
+            value={pin}
+            onChange={(e) => processPinChange(e.target.value)}
+            className="absolute opacity-0 w-0 h-0 pointer-events-none"
+            aria-label="Passcode entry"
+            autoFocus
+          />
           
           <div className="w-full max-w-sm space-y-8">
             

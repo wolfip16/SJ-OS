@@ -1,0 +1,27 @@
+{
+  "entities": {
+    "users": {
+      "title": "Users",
+      "description": "SJ OS user accounts and profiles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "pin": { "type": "string" }
+      }
+    },
+    "workspace_activities": {
+      "title": "Workspace Activities",
+      "description": "Activity logs, notes, and task states across integrated Google Workspace tools",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "activity_type": { "type": "string" },
+        "title": { "type": "string" },
+        "timestamp": { "type": "string" }
+      }
+    }
+  }
+}

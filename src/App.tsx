@@ -19,6 +19,15 @@ import { DynamicInsights } from './components/DynamicInsights';
 import { BackupPortability } from './components/BackupPortability';
 import { AuthLockScreen, ORG_USERS, UserProfile } from './components/AuthLockScreen';
 import { AdminTerminal } from './components/AdminTerminal';
+import { WorkspaceEnginesBar } from './components/WorkspaceEnginesBar';
+import { CommunicationEngineModal } from './components/CommunicationEngineModal';
+import { MeetingEngineModal } from './components/MeetingEngineModal';
+import { DrivePickerModal } from './components/DrivePickerModal';
+import { QuickCaptureDrawer } from './components/QuickCaptureDrawer';
+import { TeamChatDrawer } from './components/TeamChatDrawer';
+import { FirebaseEnclaveInfoModal } from './components/FirebaseEnclaveInfoModal';
+import { SheetsManagerModal } from './components/SheetsManagerModal';
+import { syncUserDataToFirestore } from './lib/firebaseSync';
 import {
   Sun,
   Moon,
@@ -148,6 +157,16 @@ export default function App() {
   const [dismissedSuggestionIds, setDismissedSuggestionIds] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Workspace Engine Modals & Drawers States
+  const [isMailModalOpen, setIsMailModalOpen] = useState(false);
+  const [isMeetModalOpen, setIsMeetModalOpen] = useState(false);
+  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
+  const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
+  const [isKeepDrawerOpen, setIsKeepDrawerOpen] = useState(false);
+  const [isChatDrawerOpen, setIsChatDrawerOpen] = useState(false);
+  const [isFirebaseModalOpen, setIsFirebaseModalOpen] = useState(false);
+  const [lastSyncedTime, setLastSyncedTime] = useState<string>('Just now');
+
   // Core OS Database States (scoped to currentUser)
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
@@ -210,7 +229,7 @@ export default function App() {
     }
   }, [currentUser]);
 
-  // Save changes dynamically to LocalStorage for current scoped profile
+  // Save changes dynamically to LocalStorage and Firebase Firestore for current scoped profile
   useEffect(() => {
     if (!currentUser) return;
     localStorage.setItem(`sj_os_${currentUser.id}_contacts`, JSON.stringify(contacts));
@@ -235,6 +254,19 @@ export default function App() {
     if (!currentUser) return;
     localStorage.setItem(`sj_os_${currentUser.id}_master_notes`, masterNotes);
   }, [masterNotes, currentUser]);
+
+  // Automatic Firebase Cloud Sync
+  useEffect(() => {
+    if (!currentUser) return;
+    syncUserDataToFirestore(currentUser.id, {
+      contacts,
+      timelineEvents,
+      calendarItems,
+      dailyReviews,
+      masterNotes,
+    });
+    setLastSyncedTime(new Date().toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' }));
+  }, [contacts, timelineEvents, calendarItems, dailyReviews, masterNotes, currentUser]);
 
   // Listen for custom subcomponent fast event triggers
   useEffect(() => {
@@ -1009,6 +1041,33 @@ export default function App() {
 
       {/* 3. Main Operating System Shell Workspace */}
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* Workspace Google Infrastructure Engines Bar */}
+        <WorkspaceEnginesBar
+          onOpenMail={() => setIsMailModalOpen(true)}
+          onOpenMeet={() => setIsMeetModalOpen(true)}
+          onOpenDrive={() => setIsDriveModalOpen(true)}
+          onOpenKeep={() => setIsKeepDrawerOpen(true)}
+          onOpenChat={() => setIsChatDrawerOpen(true)}
+          onOpenSheets={() => setIsSheetsModalOpen(true)}
+          onOpenCalendar={() => {
+            setActivePage('calendar');
+            showToast('Opened Schedule (Living Calendar)');
+          }}
+          onOpenContacts={() => {
+            setActivePage('contacts');
+            showToast('Opened Partners Directory');
+          }}
+          onOpenDocs={() => {
+            setActivePage('master');
+            showToast('Focused Business Memory (Executive Yellow Pad)');
+          }}
+          onOpenTasks={() => {
+            setActivePage('master');
+            showToast('Focused Today\'s Work (Task Engine)');
+          }}
+          onOpenFirebaseInfo={() => setIsFirebaseModalOpen(true)}
+        />
+
         {/* Dynamic Insight Advisor Banner */}
         <DynamicInsights
           suggestions={currentSuggestions}
@@ -1269,6 +1328,87 @@ export default function App() {
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {/* Google Workspace Engine Modals & Drawers */}
+      <CommunicationEngineModal
+        isOpen={isMailModalOpen}
+        onClose={() => setIsMailModalOpen(false)}
+        contacts={contacts}
+        onSendEmail={({ to, subject, body, attachments }) => {
+          showToast(`Dispatched Communication to ${to}`);
+          // Add activity event to timeline
+          const newEvt: TimelineEvent = {
+            id: 'evt_' + Date.now(),
+            contactId: selectedContactId || contacts[0]?.id || 'c1',
+            type: 'email',
+            title: `Sent Email: ${subject}`,
+            notes: body,
+            timestamp: new Date().toISOString(),
+          };
+          setTimelineEvents((prev) => [newEvt, ...prev]);
+        }}
+      />
+
+      <MeetingEngineModal
+        isOpen={isMeetModalOpen}
+        onClose={() => setIsMeetModalOpen(false)}
+        contacts={contacts}
+        onScheduleMeeting={({ title, date, time, meetUrl, attendees, notes }) => {
+          showToast(`Scheduled Meeting: ${title}`);
+          // Add to living calendar items
+          const newItem: CalendarItem = {
+            id: 'cal_' + Date.now(),
+            title: `📹 ${title}`,
+            time,
+            type: 'meeting',
+            durationMinutes: 30,
+            priority: 'high',
+            completed: false,
+            date,
+          };
+          setCalendarItems((prev) => [...prev, newItem]);
+
+          if (notes) {
+            setMasterNotes((prev) => `📅 [Meeting Notes: ${title} (${date})]\nURL: ${meetUrl}\n${notes}\n\n` + prev);
+          }
+        }}
+      />
+
+      <DrivePickerModal
+        isOpen={isDriveModalOpen}
+        onClose={() => setIsDriveModalOpen(false)}
+        onSelectFile={(file) => {
+          showToast(`Attached ${file.name} from Files Engine`);
+          setMasterNotes((prev) => `📎 Attached File: ${file.name} (${file.size})\n` + prev);
+        }}
+      />
+
+      <QuickCaptureDrawer
+        isOpen={isKeepDrawerOpen}
+        onClose={() => setIsKeepDrawerOpen(false)}
+        onSyncMasterNotes={(text) => {
+          setMasterNotes((prev) => text + '\n\n' + prev);
+        }}
+      />
+
+      {currentUser && (
+        <TeamChatDrawer
+          isOpen={isChatDrawerOpen}
+          onClose={() => setIsChatDrawerOpen(false)}
+          currentUser={currentUser}
+        />
+      )}
+
+      <FirebaseEnclaveInfoModal
+        isOpen={isFirebaseModalOpen}
+        onClose={() => setIsFirebaseModalOpen(false)}
+        lastSyncedAt={lastSyncedTime}
+      />
+
+      <SheetsManagerModal
+        isOpen={isSheetsModalOpen}
+        onClose={() => setIsSheetsModalOpen(false)}
+      />
     </div>
   );
 }

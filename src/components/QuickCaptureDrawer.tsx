@@ -21,24 +21,7 @@ interface QuickCaptureDrawerProps {
   onSyncMasterNotes?: (text: string) => void;
 }
 
-const INITIAL_NOTES: QuickNote[] = [
-  {
-    id: 'qn1',
-    title: 'Client Specification Check',
-    content: 'Verify structural drawing tolerances for the upcoming commercial quotation before dispatch.',
-    color: 'bg-amber-50 border-amber-200 text-amber-900',
-    pinned: true,
-    timestamp: 'Today, 10:30 AM',
-  },
-  {
-    id: 'qn2',
-    title: 'Vendor Dispatch Follow-up',
-    content: 'Confirm raw material delivery timeline with Logistics Head Devendra Rao.',
-    color: 'bg-blue-50 border-blue-200 text-blue-900',
-    pinned: false,
-    timestamp: 'Today, 09:15 AM',
-  },
-];
+const INITIAL_NOTES: QuickNote[] = [];
 
 export function QuickCaptureDrawer({ isOpen, onClose, onSyncMasterNotes }: QuickCaptureDrawerProps) {
   const [notes, setNotes] = useState<QuickNote[]>(INITIAL_NOTES);

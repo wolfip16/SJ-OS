@@ -22,24 +22,7 @@ interface TeamChatDrawerProps {
   currentUser: UserProfile;
 }
 
-const INITIAL_MESSAGES: ChatMessage[] = [
-  {
-    id: 'm1',
-    sender: 'Rohan Sharma',
-    role: 'Lead Sales',
-    text: 'Updated commercial quotation for structural material order. Please review when free.',
-    timestamp: '10:14 AM',
-    avatar: '💼',
-  },
-  {
-    id: 'm2',
-    sender: 'Devendra Rao',
-    role: 'Procurement Lead',
-    text: 'Raw material dispatch batch 4 is loaded for transport. Delivery expected tomorrow morning.',
-    timestamp: '10:28 AM',
-    avatar: '📦',
-  },
-];
+const INITIAL_MESSAGES: ChatMessage[] = [];
 
 export function TeamChatDrawer({ isOpen, onClose, currentUser }: TeamChatDrawerProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);

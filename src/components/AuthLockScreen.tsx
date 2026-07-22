@@ -128,14 +128,15 @@ export function getStoredOrgUsers(): UserProfile[] {
       );
 
       if (reshabIndex !== -1) {
+        const existingPass = parsed[reshabIndex].password || parsed[reshabIndex].pin || '281171';
         parsed[reshabIndex] = {
           ...parsed[reshabIndex],
           id: 'reshab',
           name: 'Reshab Jhunjhunwala',
           email: 'reshab.jhunjhunwalla@rbagarwalla.com',
           googleId: 'reshab.jhunjhunwalla@rbagarwalla.com',
-          pin: '281171',
-          password: '281171',
+          pin: existingPass,
+          password: existingPass,
           role: 'Organization Director / Master Executive Admin',
           avatar: '👑',
         };
@@ -187,7 +188,7 @@ interface AuthLockScreenProps {
 export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
   const [authMode, setAuthMode] = useState<'password' | 'signup'>('password');
   const [selectedUser, setSelectedUser] = useState<UserProfile>(DEFAULT_ORG_USERS[0]);
-  const [emailOrUser, setEmailOrUser] = useState('reshab.jhunjhunwalla@rbagarwalla.com');
+  const [emailOrUser, setEmailOrUser] = useState(() => localStorage.getItem('sj_os_last_email') || '');
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -241,16 +242,17 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
 
       if (!isUserMatch) return false;
 
-      // Check password or PIN match
-      const pass = u.password || u.pin;
-      return (
-        inputPass === pass ||
-        inputPass === u.pin ||
-        (u.id === 'reshab' && (inputPass === '281171' || inputPass === '2710'))
-      );
+      // Check account password or PIN match
+      const accountPassword = u.password || u.pin;
+      return inputPass === accountPassword || inputPass === u.pin;
     });
 
     if (matchedUser) {
+      if (matchedUser.email) {
+        localStorage.setItem('sj_os_last_email', matchedUser.email);
+      } else {
+        localStorage.setItem('sj_os_last_email', query);
+      }
       logSecurityAccess(inputPass, 'Success', matchedUser);
       setSuccessUser(matchedUser);
       setTimeout(() => {
@@ -301,6 +303,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
     const updatedUsers = [newProfile, ...usersList];
     saveStoredOrgUsers(updatedUsers);
     saveUserProfileToFirestore(newProfile);
+    localStorage.setItem('sj_os_last_email', cleanEmail);
 
     logSecurityAccess(signUpPassword.trim(), 'Success', newProfile);
     setSuccessUser(newProfile);
@@ -462,7 +465,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
                     <input
                       type="text"
                       required
-                      placeholder="reshab.jhunjhunwalla@rbagarwalla.com"
+                      placeholder="Enter your Email ID or Username"
                       value={emailOrUser}
                       onChange={(e) => setEmailOrUser(e.target.value)}
                       className="w-full pl-9 pr-3 py-2.5 sm:py-3 bg-white/5 border border-white/15 rounded-xl text-xs font-semibold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0A84FF]"

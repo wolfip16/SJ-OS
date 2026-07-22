@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Mail, Send, Paperclip, CheckCircle, X, Sparkles, User, FileText, Bell, ShieldCheck } from 'lucide-react';
+import { Mail, Send, Paperclip, CheckCircle, X, Sparkles, User, FileText, Bell, ShieldCheck, Users } from 'lucide-react';
 import { Contact } from '../types';
 import { UserProfile } from './AuthLockScreen';
 
@@ -14,7 +14,7 @@ interface CommunicationEngineModalProps {
   contacts: Contact[];
   initialRecipient?: Contact | null;
   currentUser?: UserProfile | null;
-  onSendEmail: (emailData: { to: string; subject: string; body: string; attachments: string[] }) => void;
+  onSendEmail: (emailData: { to: string; cc?: string; bcc?: string; subject: string; body: string; attachments: string[] }) => void;
   onAddTask?: (taskData: { title: string; category: 'Tasks' | 'Schedule' | 'Deliverables'; time?: string; date?: string; notes?: string }) => void;
 }
 
@@ -28,6 +28,9 @@ export function CommunicationEngineModal({
   onAddTask,
 }: CommunicationEngineModalProps) {
   const [to, setTo] = useState(initialRecipient ? initialRecipient.email : '');
+  const [cc, setCc] = useState('');
+  const [bcc, setBcc] = useState('');
+  const [showCcBcc, setShowCcBcc] = useState(false);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [attachments, setAttachments] = useState<string[]>([]);
@@ -42,14 +45,14 @@ export function CommunicationEngineModal({
     e.preventDefault();
     if (!to || !subject) return;
 
-    onSendEmail({ to, subject, body, attachments });
+    onSendEmail({ to, cc, bcc, subject, body, attachments });
 
     // SJ OS Core Principle: Task & Reminder Auto-Creation
     if (createTaskReminder && onAddTask) {
       onAddTask({
         title: `Follow up: ${subject} (${to})`,
         category: 'Tasks',
-        notes: `Sent from ${senderEmail} via Gmail Engine to ${to}. Subject: ${subject}`,
+        notes: `Sent from ${senderEmail} via Gmail Engine to ${to}${cc ? ` (CC: ${cc})` : ''}. Subject: ${subject}`,
       });
     }
 
@@ -58,6 +61,8 @@ export function CommunicationEngineModal({
       setIsSent(false);
       onClose();
       setTo('');
+      setCc('');
+      setBcc('');
       setSubject('');
       setBody('');
       setAttachments([]);
@@ -120,11 +125,20 @@ export function CommunicationEngineModal({
               </span>
             </div>
 
-            {/* Recipient */}
+            {/* Recipient - TO */}
             <div>
-              <label className="block text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">
-                Recipient Email
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                  Recipient Email (To)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowCcBcc(!showCcBcc)}
+                  className="text-[10px] text-[#007AFF] font-bold hover:underline cursor-pointer"
+                >
+                  {showCcBcc ? '- Hide CC / BCC' : '+ Add CC / BCC'}
+                </button>
+              </div>
               <div className="relative">
                 <input
                   type="email"
@@ -138,8 +152,8 @@ export function CommunicationEngineModal({
               </div>
               {contacts.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  <span className="text-[9px] text-gray-400 font-bold uppercase self-center">Directory Quick Contacts:</span>
-                  {contacts.slice(0, 4).map((c) => (
+                  <span className="text-[9px] text-gray-400 font-bold uppercase self-center">Directory Contacts:</span>
+                  {contacts.slice(0, 5).map((c) => (
                     <button
                       key={c.id}
                       type="button"
@@ -152,6 +166,51 @@ export function CommunicationEngineModal({
                 </div>
               )}
             </div>
+
+            {/* Optional CC & BCC Fields */}
+            {showCcBcc && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200 animate-in fade-in duration-150">
+                <div>
+                  <label className="block text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">
+                    CC (Carbon Copy)
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="e.g., manager@partnercompany.com"
+                    value={cc}
+                    onChange={(e) => setCc(e.target.value)}
+                    className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#007AFF] transition"
+                  />
+                  {contacts.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {contacts.slice(0, 3).map((c) => (
+                        <button
+                          key={'cc_' + c.id}
+                          type="button"
+                          onClick={() => setCc(c.email)}
+                          className="text-[9px] bg-white border border-gray-200 hover:border-[#007AFF] text-gray-600 px-1.5 py-0.5 rounded cursor-pointer"
+                        >
+                          + {c.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">
+                    BCC (Blind Carbon Copy)
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="e.g., records@rbagarwalla.com"
+                    value={bcc}
+                    onChange={(e) => setBcc(e.target.value)}
+                    className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#007AFF] transition"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Subject */}
             <div>

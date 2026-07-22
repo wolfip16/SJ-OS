@@ -65,7 +65,8 @@ export type CalendarItemType =
   | 'buffer'
   | 'deep_work'
   | 'planning'
-  | 'research';
+  | 'research'
+  | 'task';
 
 export interface CalendarItem {
   id: string;

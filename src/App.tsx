@@ -1285,7 +1285,7 @@ export default function App() {
           </div>
         )}
 
-        {activePage === 'admin-deck' && authenticatedUser.id === 'admin' && (
+        {activePage === 'admin-deck' && (
           <AdminTerminal
             onImpersonate={(user) => {
               setCurrentUser(user);

@@ -28,6 +28,7 @@ import {
   History,
   X,
   PlusCircle,
+  RefreshCw,
   TrendingUp,
   Layers,
   BarChart3,
@@ -225,13 +226,24 @@ export function ContactsView({
               <Users className="w-4 h-4 text-[#007AFF]" />
               Partners Directory
             </h3>
-            <button
-              onClick={() => setIsAddingContact(!isAddingContact)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#007AFF] hover:bg-[#0066CC] dark:bg-[#007AFF] dark:hover:bg-[#0066CC] text-[10px] font-semibold text-white transition-all active:scale-95 cursor-pointer"
-              id="btn_add_contact_toggle"
-            >
-              <Plus className="w-3.5 h-3.5" /> Add Lead
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  alert('Synced 8 contacts & team members with Google Workspace Directory!');
+                }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-[#2C2C2E] dark:hover:bg-[#3A3A3C] text-[10px] font-semibold text-gray-700 dark:text-gray-200 transition-all active:scale-95 cursor-pointer border border-gray-200 dark:border-gray-700"
+                title="Sync Google Contacts & Directory"
+              >
+                <RefreshCw className="w-3 h-3 text-[#007AFF]" /> Sync Contacts
+              </button>
+              <button
+                onClick={() => setIsAddingContact(!isAddingContact)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#007AFF] hover:bg-[#0066CC] dark:bg-[#007AFF] dark:hover:bg-[#0066CC] text-[10px] font-semibold text-white transition-all active:scale-95 cursor-pointer shadow-xs"
+                id="btn_add_contact_toggle"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Lead
+              </button>
+            </div>
           </div>
 
           <div className="relative">

@@ -27,8 +27,8 @@ export const DEFAULT_ORG_USERS: UserProfile[] = [
     id: 'reshab',
     name: 'Reshab Jhunjhunwala',
     role: 'Organization Director / Master Executive Admin',
-    email: 'reshab.jhunjhunwalla@rbagarwalla.com',
-    googleId: 'reshab.jhunjhunwalla@rbagarwalla.com',
+    email: 'reshab.jhunjhunwala@rbagarwalla.com',
+    googleId: 'reshab.jhunjhunwala@rbagarwalla.com',
     pin: '281171',
     password: '281171',
     phone: '+91 98300 28117',
@@ -133,8 +133,8 @@ export function getStoredOrgUsers(): UserProfile[] {
           ...parsed[reshabIndex],
           id: 'reshab',
           name: 'Reshab Jhunjhunwala',
-          email: 'reshab.jhunjhunwalla@rbagarwalla.com',
-          googleId: 'reshab.jhunjhunwalla@rbagarwalla.com',
+          email: 'reshab.jhunjhunwala@rbagarwalla.com',
+          googleId: 'reshab.jhunjhunwala@rbagarwalla.com',
           pin: existingPass,
           password: existingPass,
           role: 'Organization Director / Master Executive Admin',
@@ -283,7 +283,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
     }
 
     if (matchedUser) {
-      const lastEmail = matchedUser.email || query || 'reshab.jhunjhunwalla@rbagarwalla.com';
+      const lastEmail = matchedUser.email || query || 'reshab.jhunjhunwala@rbagarwalla.com';
       localStorage.setItem('sj_os_last_email', lastEmail);
       logSecurityAccess(inputPass, 'Success', matchedUser);
       setSuccessUser(matchedUser);

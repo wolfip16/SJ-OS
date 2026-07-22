@@ -40,7 +40,7 @@ export function CommunicationEngineModal({
   const [isSending, setIsSending] = useState(false);
   const [sendSuccessMessage, setSendSuccessMessage] = useState('Sent Directly via Gmail API');
 
-  const senderEmail = currentUser?.email || currentUser?.googleId || 'reshab.jhunjhunwalla@rbagarwalla.com';
+  const senderEmail = currentUser?.email || currentUser?.googleId || 'reshab.jhunjhunwala@rbagarwalla.com';
 
   if (!isOpen) return null;
 

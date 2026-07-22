@@ -45,7 +45,7 @@ export function MeetingEngineModal({
   const [createTaskReminder, setCreateTaskReminder] = useState(true);
   const [isCreated, setIsCreated] = useState(false);
 
-  const organizerEmail = currentUser?.email || currentUser?.googleId || 'reshab.jhunjhunwalla@rbagarwalla.com';
+  const organizerEmail = currentUser?.email || currentUser?.googleId || 'reshab.jhunjhunwala@rbagarwalla.com';
 
   if (!isOpen) return null;
 

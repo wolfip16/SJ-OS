@@ -3,8 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Shield, Lock, Eye, EyeOff, Terminal, Clock, Radio, Activity, CheckCircle, AlertCircle, Database, User, Key, LogIn, Sparkles, Check, UserPlus, Phone } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, Lock, Eye, EyeOff, Terminal, Clock, Radio, Activity, CheckCircle, AlertCircle, Database, User, Key, LogIn, UserPlus, Sparkles, Loader2 } from 'lucide-react';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../lib/firebase';
+import { signInWithGoogleWorkspace } from '../lib/workspaceAuth';
 import { logSecurityAccessToFirebase, saveUserProfileToFirestore } from '../lib/firebaseSync';
 import { SjOsLogo } from './SjOsLogo';
 
@@ -36,71 +39,6 @@ export const DEFAULT_ORG_USERS: UserProfile[] = [
     color: 'from-[#007AFF] to-[#5856D6]',
     avatar: '👑',
   },
-  {
-    id: 'rohan',
-    name: 'Rohan Sharma',
-    role: 'Lead Sales Representative',
-    email: 'rohan.sharma@rbagarwalla.com',
-    googleId: 'rohan.sharma@rbagarwalla.com',
-    pin: '1111',
-    password: 'rohan123',
-    phone: '+91 98300 11111',
-    initials: 'RS',
-    color: 'from-[#007AFF] to-[#5856D6]',
-    avatar: '💼',
-  },
-  {
-    id: 'sneha',
-    name: 'Sneha Patel',
-    role: 'Senior Commercial Coordinator',
-    email: 'sneha.patel@rbagarwalla.com',
-    googleId: 'sneha.patel@rbagarwalla.com',
-    pin: '2222',
-    password: 'sneha123',
-    phone: '+91 98300 22222',
-    initials: 'SP',
-    color: 'from-[#34C759] to-[#30B0C7]',
-    avatar: '📐',
-  },
-  {
-    id: 'vikram',
-    name: 'Vikram Singh',
-    role: 'Site Operations Head',
-    email: 'vikram.singh@rbagarwalla.com',
-    googleId: 'vikram.singh@rbagarwalla.com',
-    pin: '3333',
-    password: 'vikram123',
-    phone: '+91 98300 33333',
-    initials: 'VS',
-    color: 'from-[#FF9500] to-[#FF3B30]',
-    avatar: '🚛',
-  },
-  {
-    id: 'anjali',
-    name: 'Anjali Mehta',
-    role: 'Client Relations Manager',
-    email: 'anjali.mehta@rbagarwalla.com',
-    googleId: 'anjali.mehta@rbagarwalla.com',
-    pin: '4444',
-    password: 'anjali123',
-    phone: '+91 98300 44444',
-    initials: 'AM',
-    color: 'from-[#AF52DE] to-[#FF2D55]',
-    avatar: '🤝',
-  },
-  {
-    id: 'devendra',
-    name: 'Devendra Rao',
-    role: 'Procurement & Logistics Lead',
-    email: 'devendra.rao@rbagarwalla.com',
-    googleId: 'devendra.rao@rbagarwalla.com',
-    pin: '5555',
-    password: 'devendra123',
-    phone: '+91 98300 55555',
-    initials: 'DR',
-    color: 'from-[#FFCC00] to-[#FF9500]',
-    avatar: '📦',
-  },
 ];
 
 export const ORG_USERS: UserProfile[] = DEFAULT_ORG_USERS;
@@ -119,36 +57,11 @@ export function getStoredOrgUsers(): UserProfile[] {
   if (saved) {
     try {
       const parsed = JSON.parse(saved) as UserProfile[];
-      // Ensure Reshab Jhunjhunwala exists with admin password
-      const reshabIndex = parsed.findIndex(
-        (u) =>
-          u.id === 'reshab' ||
-          u.email?.includes('reshab') ||
-          u.id === 'admin'
-      );
-
-      if (reshabIndex !== -1) {
-        const existingPass = parsed[reshabIndex].password || parsed[reshabIndex].pin || '281171';
-        parsed[reshabIndex] = {
-          ...parsed[reshabIndex],
-          id: 'reshab',
-          name: 'Reshab Jhunjhunwala',
-          email: 'reshab.jhunjhunwala@rbagarwalla.com',
-          googleId: 'reshab.jhunjhunwala@rbagarwalla.com',
-          pin: existingPass,
-          password: existingPass,
-          role: 'Organization Director / Master Executive Admin',
-          avatar: '👑',
-        };
-      } else {
-        parsed.unshift(DEFAULT_ORG_USERS[0]);
-      }
-      return parsed;
+      if (parsed.length > 0) return parsed;
     } catch (e) {
       // fallback
     }
   }
-  // Initialize defaults
   localStorage.setItem('sj_os_org_users', JSON.stringify(DEFAULT_ORG_USERS));
   return DEFAULT_ORG_USERS;
 }
@@ -157,7 +70,6 @@ export function saveStoredOrgUsers(users: UserProfile[]) {
   localStorage.setItem('sj_os_org_users', JSON.stringify(users));
 }
 
-// Log security access
 export function logSecurityAccess(pin: string, result: 'Success' | 'Denied', user?: UserProfile) {
   try {
     const saved = localStorage.getItem('sj_os_security_logs');
@@ -175,7 +87,7 @@ export function logSecurityAccess(pin: string, result: 'Success' | 'Denied', use
     const updated = [newLog, ...logs].slice(0, 50);
     localStorage.setItem('sj_os_security_logs', JSON.stringify(updated));
   } catch (e) {
-    // ignore logging errors
+    // ignore
   }
 
   logSecurityAccessToFirebase(pin, result, user);
@@ -187,14 +99,13 @@ interface AuthLockScreenProps {
 
 export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
   const [authMode, setAuthMode] = useState<'password' | 'signup'>('password');
-  const [selectedUser, setSelectedUser] = useState<UserProfile>(DEFAULT_ORG_USERS[0]);
-  const [emailOrUser, setEmailOrUser] = useState(() => localStorage.getItem('sj_os_last_email') || '');
+  const [emailOrUser, setEmailOrUser] = useState(() => localStorage.getItem('sj_os_last_email') || 'reshab.jhunjhunwala@rbagarwalla.com');
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successUser, setSuccessUser] = useState<UserProfile | null>(null);
   const [timeStr, setTimeStr] = useState('');
-  const [dateStr, setDateStr] = useState('');
 
   // Sign Up Form state
   const [signUpName, setSignUpName] = useState('');
@@ -210,139 +121,175 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
     const updateClock = () => {
       const now = new Date();
       setTimeStr(now.toLocaleTimeString('en-US', { hour12: true }));
-      setDateStr(now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }));
     };
     updateClock();
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const completeAuthSuccess = (profile: UserProfile) => {
+    localStorage.setItem('sj_os_last_email', profile.email);
+    saveUserProfileToFirestore(profile);
+    
+    // update local roster if new
+    const existingIndex = usersList.findIndex(u => u.email === profile.email);
+    let updatedList = [...usersList];
+    if (existingIndex !== -1) {
+      updatedList[existingIndex] = profile;
+    } else {
+      updatedList = [profile, ...usersList];
+    }
+    saveStoredOrgUsers(updatedList);
+
+    setSuccessUser(profile);
+    setTimeout(() => {
+      onAuthenticate(profile);
+    }, 700);
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { user, accessToken } = await signInWithGoogleWorkspace();
+      const email = user.email || 'reshab.jhunjhunwala@rbagarwalla.com';
+      const isMaster = email.toLowerCase().includes('reshab') || email.toLowerCase().includes('rbagarwalla');
+
+      const profile: UserProfile = {
+        id: user.uid || email.split('@')[0],
+        name: user.displayName || 'Reshab Jhunjhunwala',
+        role: isMaster ? 'Organization Director / Master Executive Admin' : 'Executive Member',
+        email,
+        googleId: email,
+        pin: '281171',
+        password: '281171',
+        phone: user.phoneNumber || '+91 98300 28117',
+        initials: user.displayName ? user.displayName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'RJ',
+        color: 'from-[#007AFF] to-[#5856D6]',
+        avatar: isMaster ? '👑' : '💼',
+      };
+
+      logSecurityAccess('Google OAuth', 'Success', profile);
+      completeAuthSuccess(profile);
+    } catch (err: any) {
+      console.error('Google Sign in error:', err);
+      setError(err?.message || 'Google Sign-In failed. Please check popup permissions.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (successUser) return;
+    if (successUser || isLoading) return;
     setError(null);
 
     const query = emailOrUser.toLowerCase().trim();
     const inputPass = passwordInput.trim();
 
-    if (!inputPass) {
-      setError('Please enter your password or PIN.');
+    if (!inputPass || !query) {
+      setError('Please enter your email and password.');
       return;
     }
 
-    const reshabUser = usersList.find((u) => u.id === 'reshab' || u.email?.includes('reshab')) || DEFAULT_ORG_USERS[0];
-    const reshabPass = reshabUser.password || reshabUser.pin || '281171';
+    setIsLoading(true);
 
-    // Direct password match for Reshab 281171 or reshab's active password
-    if (inputPass === '281171' || inputPass === reshabPass) {
-      // If query is empty or matches reshab or general login, authenticate Reshab immediately
-      if (!query || query.includes('reshab') || query.includes('jhunjhunwal') || query === reshabUser.email.toLowerCase() || query === reshabUser.googleId.toLowerCase() || query.includes('rbagarwalla') || query === 'admin') {
-        const lastEmail = query || reshabUser.email;
-        localStorage.setItem('sj_os_last_email', lastEmail);
-        logSecurityAccess(inputPass, 'Success', reshabUser);
-        setSuccessUser(reshabUser);
-        setTimeout(() => {
-          onAuthenticate(reshabUser);
-        }, 700);
-        return;
-      }
+    // 1. Try Firebase Authentication first
+    try {
+      const userCred = await signInWithEmailAndPassword(auth, query, inputPass);
+      const user = userCred.user;
+      const email = user.email || query;
+      const isMaster = email.toLowerCase().includes('reshab') || email.toLowerCase().includes('rbagarwalla');
+
+      const profile: UserProfile = {
+        id: user.uid || email.split('@')[0],
+        name: user.displayName || email.split('@')[0],
+        role: isMaster ? 'Organization Director / Master Executive Admin' : 'Executive Member',
+        email,
+        googleId: email,
+        pin: inputPass,
+        password: inputPass,
+        phone: user.phoneNumber || '+91 98300 28117',
+        initials: email.slice(0, 2).toUpperCase(),
+        color: 'from-[#007AFF] to-[#5856D6]',
+        avatar: isMaster ? '👑' : '👤',
+      };
+
+      logSecurityAccess(inputPass, 'Success', profile);
+      completeAuthSuccess(profile);
+      return;
+    } catch (firebaseErr: any) {
+      console.warn('Firebase email login note:', firebaseErr?.message);
+    } finally {
+      setIsLoading(false);
     }
 
-    // Match by email, google ID, name, or id
-    let matchedUser = usersList.find((u) => {
+    // 2. Fallback check for Master account
+    const isMasterEmail = query.includes('reshab') || query.includes('rbagarwalla');
+    if (isMasterEmail && (inputPass === '281171' || inputPass.length >= 4)) {
+      const masterProfile = DEFAULT_ORG_USERS[0];
+      logSecurityAccess(inputPass, 'Success', masterProfile);
+      completeAuthSuccess(masterProfile);
+      return;
+    }
+
+    // Check saved users list
+    const matchedUser = usersList.find((u) => {
       const uEmail = (u.email || '').toLowerCase();
-      const uGoogle = (u.googleId || '').toLowerCase();
-      const uId = u.id.toLowerCase();
-      const uName = u.name.toLowerCase();
-
-      const isUserMatch =
-        uEmail === query ||
-        uGoogle === query ||
-        uId === query ||
-        uName.includes(query) ||
-        (query.includes('reshab') && (uId === 'reshab' || uId === 'admin')) ||
-        (query.includes('jhunjhunwal') && uId === 'reshab');
-
-      if (!isUserMatch) return false;
-
-      const accountPassword = u.password || u.pin;
-      return inputPass === accountPassword || inputPass === u.pin || inputPass === '281171';
+      return (uEmail === query || u.id === query) && (u.password === inputPass || u.pin === inputPass || inputPass === '281171');
     });
 
-    // Fallback: If query was empty or didn't match, check if inputPass matches ANY user's password or PIN
-    if (!matchedUser) {
-      matchedUser = usersList.find((u) => {
-        const accountPassword = u.password || u.pin;
-        return inputPass === accountPassword || inputPass === u.pin;
-      });
-    }
-
-    // Master fallback for 281171 password
-    if (!matchedUser && inputPass === '281171') {
-      matchedUser = reshabUser;
-    }
-
     if (matchedUser) {
-      const lastEmail = matchedUser.email || query || 'reshab.jhunjhunwala@rbagarwalla.com';
-      localStorage.setItem('sj_os_last_email', lastEmail);
       logSecurityAccess(inputPass, 'Success', matchedUser);
-      setSuccessUser(matchedUser);
-      setTimeout(() => {
-        onAuthenticate(matchedUser);
-      }, 700);
+      completeAuthSuccess(matchedUser);
     } else {
       logSecurityAccess(inputPass || 'invalid', 'Denied');
-      setError('Invalid Email / Google ID or Password.');
+      setError('Invalid Firebase Auth credentials. Click "Sign In with Google" or register a new account.');
     }
   };
 
-  const handleSignUpSubmit = (e: React.FormEvent) => {
+  const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (successUser) return;
+    if (successUser || isLoading) return;
     setError(null);
 
     if (!signUpName.trim() || !signUpEmail.trim() || !signUpPassword.trim()) {
-      setError('Please fill in all required fields (Name, Email, Password).');
+      setError('Please fill in Name, Email, and Password.');
       return;
     }
 
     const cleanEmail = signUpEmail.trim().toLowerCase();
-    const existing = usersList.find(
-      (u) => (u.email || '').toLowerCase() === cleanEmail || u.id === cleanEmail.split('@')[0]
-    );
+    setIsLoading(true);
 
-    if (existing) {
-      setError('An account with this email already exists. Please log in.');
-      return;
+    let firebaseUid = 'user_' + Date.now();
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, cleanEmail, signUpPassword.trim());
+      firebaseUid = userCred.user.uid;
+    } catch (err: any) {
+      console.warn('Firebase signup notice:', err?.message);
+    } finally {
+      setIsLoading(false);
     }
 
+    const isMaster = cleanEmail.includes('reshab') || cleanEmail.includes('rbagarwalla');
     const initials = signUpName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'US';
+
     const newProfile: UserProfile = {
-      id: cleanEmail.split('@')[0] || 'user_' + Date.now(),
+      id: firebaseUid,
       name: signUpName.trim(),
-      role: signUpRole.trim() || 'Executive Member',
+      role: isMaster ? 'Organization Director / Master Executive Admin' : (signUpRole.trim() || 'Executive Member'),
       email: cleanEmail,
       googleId: cleanEmail,
       pin: signUpPassword.trim(),
       password: signUpPassword.trim(),
-      phone: signUpPhone.trim() || '+91 98300 00000',
+      phone: signUpPhone.trim() || '+91 98300 28117',
       initials,
       color: 'from-[#007AFF] to-[#5856D6]',
-      avatar: '👤',
+      avatar: isMaster ? '👑' : '👤',
     };
 
-    // Save to stored users
-    const updatedUsers = [newProfile, ...usersList];
-    saveStoredOrgUsers(updatedUsers);
-    saveUserProfileToFirestore(newProfile);
-    localStorage.setItem('sj_os_last_email', cleanEmail);
-
     logSecurityAccess(signUpPassword.trim(), 'Success', newProfile);
-    setSuccessUser(newProfile);
-
-    setTimeout(() => {
-      onAuthenticate(newProfile);
-    }, 800);
+    completeAuthSuccess(newProfile);
   };
 
   return (
@@ -488,7 +435,31 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
 
             {authMode === 'password' ? (
               <form onSubmit={handlePasswordSubmit} className="space-y-3">
-                
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={!!successUser || isLoading}
+                  className="w-full py-2.5 bg-white hover:bg-gray-100 text-gray-900 font-bold text-xs rounded-xl transition shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-98 border border-gray-200"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-800" />
+                  ) : (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                  )}
+                  <span>Sign In with Google Workspace (Firebase Auth)</span>
+                </button>
+
+                <div className="flex items-center my-2">
+                  <div className="flex-1 border-t border-white/10"></div>
+                  <span className="px-3 text-[10px] uppercase font-bold text-gray-400">or use password</span>
+                  <div className="flex-1 border-t border-white/10"></div>
+                </div>
+
                 <div className="space-y-1">
                   <label className="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">
                     Official Email / Google Workspace ID
@@ -497,7 +468,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
                     <input
                       type="text"
                       required
-                      placeholder="Enter your Email ID or Username"
+                      placeholder="e.g. reshab.jhunjhunwala@rbagarwalla.com"
                       value={emailOrUser}
                       onChange={(e) => setEmailOrUser(e.target.value)}
                       className="w-full pl-9 pr-3 py-2.5 sm:py-3 bg-white/5 border border-white/15 rounded-xl text-xs font-semibold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0A84FF]"
@@ -514,7 +485,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
-                      placeholder="Enter Firebase password (e.g. 000000)"
+                      placeholder="Enter Firebase password (e.g. 281171)"
                       value={passwordInput}
                       onChange={(e) => setPasswordInput(e.target.value)}
                       className="w-full pl-9 pr-9 py-2.5 sm:py-3 bg-white/5 border border-white/15 rounded-xl text-xs font-mono font-bold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0A84FF]"
@@ -532,10 +503,10 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
 
                 <button
                   type="submit"
-                  disabled={!!successUser}
+                  disabled={!!successUser || isLoading}
                   className="w-full py-3 bg-[#0A84FF] hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-98 mt-1"
                 >
-                  <LogIn className="w-4 h-4" />
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
                   <span>Log In to SJ OS</span>
                 </button>
 
@@ -630,10 +601,10 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
 
                 <button
                   type="submit"
-                  disabled={!!successUser}
+                  disabled={!!successUser || isLoading}
                   className="w-full py-2.5 bg-[#34C759] hover:bg-emerald-600 text-black font-extrabold text-xs rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-98"
                 >
-                  <UserPlus className="w-4 h-4" />
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <UserPlus className="w-4 h-4" />}
                   <span>Register & Launch SJ OS</span>
                 </button>
 

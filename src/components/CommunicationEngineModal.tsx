@@ -4,15 +4,18 @@
  */
 
 import React, { useState } from 'react';
-import { Mail, Send, Paperclip, CheckCircle, X, Sparkles, User, FileText } from 'lucide-react';
+import { Mail, Send, Paperclip, CheckCircle, X, Sparkles, User, FileText, Bell, ShieldCheck } from 'lucide-react';
 import { Contact } from '../types';
+import { UserProfile } from './AuthLockScreen';
 
 interface CommunicationEngineModalProps {
   isOpen: boolean;
   onClose: () => void;
   contacts: Contact[];
   initialRecipient?: Contact | null;
+  currentUser?: UserProfile | null;
   onSendEmail: (emailData: { to: string; subject: string; body: string; attachments: string[] }) => void;
+  onAddTask?: (taskData: { title: string; category: 'Tasks' | 'Schedule' | 'Deliverables'; time?: string; date?: string; notes?: string }) => void;
 }
 
 export function CommunicationEngineModal({
@@ -20,13 +23,18 @@ export function CommunicationEngineModal({
   onClose,
   contacts,
   initialRecipient,
+  currentUser,
   onSendEmail,
+  onAddTask,
 }: CommunicationEngineModalProps) {
   const [to, setTo] = useState(initialRecipient ? initialRecipient.email : '');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [attachments, setAttachments] = useState<string[]>([]);
+  const [createTaskReminder, setCreateTaskReminder] = useState(true);
   const [isSent, setIsSent] = useState(false);
+
+  const senderEmail = currentUser?.email || currentUser?.googleId || 'reshab.jhunjhunwalla@rbagarwalla.com';
 
   if (!isOpen) return null;
 
@@ -35,6 +43,16 @@ export function CommunicationEngineModal({
     if (!to || !subject) return;
 
     onSendEmail({ to, subject, body, attachments });
+
+    // SJ OS Core Principle: Task & Reminder Auto-Creation
+    if (createTaskReminder && onAddTask) {
+      onAddTask({
+        title: `Follow up: ${subject} (${to})`,
+        category: 'Tasks',
+        notes: `Sent from ${senderEmail} via Gmail Engine to ${to}. Subject: ${subject}`,
+      });
+    }
+
     setIsSent(true);
     setTimeout(() => {
       setIsSent(false);
@@ -82,12 +100,26 @@ export function CommunicationEngineModal({
             <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto animate-bounce" />
             <h3 className="text-base font-bold text-gray-900">Message Dispatched</h3>
             <p className="text-xs text-gray-500">
-              Your email with Drive attachments was processed automatically through Communication Engine.
+              Your email was dispatched using <span className="font-semibold text-gray-800">{senderEmail}</span> via Gmail Engine & recorded in SJ OS.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSend} className="p-6 space-y-4">
             
+            {/* Sender Google Workspace Account Badge */}
+            <div className="bg-blue-50/80 border border-blue-150 p-2.5 rounded-xl flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#007AFF] shrink-0" />
+                <div>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase block leading-none">Sender Account (Google Workspace)</span>
+                  <span className="font-semibold text-gray-900">{senderEmail}</span>
+                </div>
+              </div>
+              <span className="text-[9px] bg-blue-100 text-[#007AFF] font-bold px-2 py-0.5 rounded-full border border-blue-200 uppercase">
+                Synced ID
+              </span>
+            </div>
+
             {/* Recipient */}
             <div>
               <label className="block text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">
@@ -191,6 +223,24 @@ export function CommunicationEngineModal({
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Auto Task Reminder Checkbox */}
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between">
+              <label htmlFor="createTaskReminder" className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-gray-800">
+                <input
+                  id="createTaskReminder"
+                  type="checkbox"
+                  checked={createTaskReminder}
+                  onChange={(e) => setCreateTaskReminder(e.target.checked)}
+                  className="rounded border-gray-300 text-[#007AFF] focus:ring-[#007AFF] h-4 w-4"
+                />
+                <Bell className="w-3.5 h-3.5 text-[#007AFF]" />
+                <span>Auto-create Task Reminder in SJ OS (Follow-up email)</span>
+              </label>
+              <span className="text-[9px] text-[#007AFF] font-bold uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                SJ OS Core
+              </span>
             </div>
 
             {/* Footer Buttons */}

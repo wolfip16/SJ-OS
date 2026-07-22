@@ -65,6 +65,9 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
   const [empName, setEmpName] = useState('');
   const [empRole, setEmpRole] = useState('');
   const [empPin, setEmpPin] = useState('');
+  const [empEmail, setEmpEmail] = useState('');
+  const [empPhone, setEmpPhone] = useState('');
+  const [empPassword, setEmpPassword] = useState('');
   const [empAvatar, setEmpAvatar] = useState('💼');
   const [empColor, setEmpColor] = useState('from-[#007AFF] to-[#5856D6]');
   const [editingEmployeeId, setEditingEmployeeId] = useState<string | null>(null);

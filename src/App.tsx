@@ -27,6 +27,7 @@ import { QuickCaptureDrawer } from './components/QuickCaptureDrawer';
 import { TeamChatDrawer } from './components/TeamChatDrawer';
 import { FirebaseEnclaveInfoModal } from './components/FirebaseEnclaveInfoModal';
 import { SheetsManagerModal } from './components/SheetsManagerModal';
+import { ProfileEditorModal } from './components/ProfileEditorModal';
 import { syncUserDataToFirestore } from './lib/firebaseSync';
 import {
   Sun,
@@ -165,6 +166,7 @@ export default function App() {
   const [isKeepDrawerOpen, setIsKeepDrawerOpen] = useState(false);
   const [isChatDrawerOpen, setIsChatDrawerOpen] = useState(false);
   const [isFirebaseModalOpen, setIsFirebaseModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [lastSyncedTime, setLastSyncedTime] = useState<string>('Just now');
 
   // Core OS Database States (scoped to currentUser)
@@ -892,17 +894,21 @@ export default function App() {
 
           {/* PAGE NAVIGATION SEGMENTS (Separate pages, keeping current as master sheet) */}
           <div className="flex flex-wrap items-center justify-center bg-[#F2F2F7] p-0.5 rounded-xl border border-[#E5E5EA] gap-0.5">
-            {authenticatedUser.id === 'admin' && (
+            {(authenticatedUser.id === 'reshab' ||
+              authenticatedUser.id === 'admin' ||
+              authenticatedUser.email?.toLowerCase().includes('reshab') ||
+              authenticatedUser.role?.toLowerCase().includes('admin') ||
+              authenticatedUser.role?.toLowerCase().includes('director')) && (
               <button
                 onClick={() => setActivePage('admin-deck')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                   activePage === 'admin-deck'
-                    ? 'bg-[#007AFF] text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)] font-extrabold'
-                    : 'text-[#8E8E93] hover:text-[#1D1D1F]'
+                    ? 'bg-[#007AFF] text-white shadow-[0_2px_8px_rgba(0,122,255,0.3)] font-extrabold ring-2 ring-blue-300'
+                    : 'bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 border border-amber-500/30 font-bold'
                 }`}
               >
-                <Crown className="w-3.5 h-3.5" />
-                Admin Command Deck
+                <Crown className="w-3.5 h-3.5 text-amber-500" />
+                <span>Master Admin Deck</span>
               </button>
             )}
             <button
@@ -979,14 +985,25 @@ export default function App() {
 
             {/* User Profile Indicator & Logout */}
             <div className="flex items-center gap-2 border-l border-[#E5E5EA] pl-3.5 ml-1">
-              <div className={`h-8.5 w-8.5 rounded-xl bg-linear-to-br ${currentUser?.color} text-white font-bold text-xs flex items-center justify-center relative overflow-hidden shrink-0 shadow-xs`}>
-                {currentUser?.initials}
-                <div className="absolute inset-0 bg-linear-to-b from-white/10 to-transparent pointer-events-none" />
-              </div>
-              <div className="hidden lg:block text-left">
-                <span className="block text-[10px] font-extrabold text-[#1D1D1F] leading-tight truncate max-w-[100px]">{currentUser?.name}</span>
-                <span className="block text-[8px] text-[#8E8E93] font-bold uppercase tracking-wider">{currentUser?.id === 'admin' ? 'Director' : 'Staff'}</span>
-              </div>
+              <button
+                onClick={() => setIsProfileModalOpen(true)}
+                className="flex items-center gap-2 group cursor-pointer p-1 rounded-xl hover:bg-gray-100 transition"
+                title="Click to edit profile, password, and Google ID"
+              >
+                <div className={`h-8.5 w-8.5 rounded-xl bg-linear-to-br ${currentUser?.color} text-white font-bold text-xs flex items-center justify-center relative overflow-hidden shrink-0 shadow-xs group-hover:scale-105 transition-transform`}>
+                  {currentUser?.avatar || currentUser?.initials}
+                  <div className="absolute inset-0 bg-linear-to-b from-white/10 to-transparent pointer-events-none" />
+                </div>
+                <div className="hidden lg:block text-left">
+                  <span className="block text-[10px] font-extrabold text-[#1D1D1F] leading-tight truncate max-w-[120px]">
+                    {currentUser?.name}
+                  </span>
+                  <span className="block text-[8px] text-[#007AFF] font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span>{currentUser?.id === 'reshab' || currentUser?.id === 'admin' ? 'Master Admin' : 'Edit Profile'}</span>
+                  </span>
+                </div>
+              </button>
+
               <button
                 onClick={() => {
                   setAuthenticatedUser(null);
@@ -1334,6 +1351,7 @@ export default function App() {
         isOpen={isMailModalOpen}
         onClose={() => setIsMailModalOpen(false)}
         contacts={contacts}
+        currentUser={currentUser}
         onSendEmail={({ to, subject, body, attachments }) => {
           showToast(`Dispatched Communication to ${to}`);
           // Add activity event to timeline
@@ -1347,12 +1365,27 @@ export default function App() {
           };
           setTimelineEvents((prev) => [newEvt, ...prev]);
         }}
+        onAddTask={({ title, notes }) => {
+          const newCal: CalendarItem = {
+            id: 'cal_' + Date.now(),
+            title: `✉️ ${title}`,
+            time: '12:00',
+            type: 'call',
+            durationMinutes: 15,
+            priority: 'medium',
+            completed: false,
+            date: new Date().toISOString().split('T')[0],
+          };
+          setCalendarItems((prev) => [...prev, newCal]);
+          showToast(`Auto-created SJ OS task reminder: ${title}`);
+        }}
       />
 
       <MeetingEngineModal
         isOpen={isMeetModalOpen}
         onClose={() => setIsMeetModalOpen(false)}
         contacts={contacts}
+        currentUser={currentUser}
         onScheduleMeeting={({ title, date, time, meetUrl, attendees, notes }) => {
           showToast(`Scheduled Meeting: ${title}`);
           // Add to living calendar items
@@ -1371,6 +1404,20 @@ export default function App() {
           if (notes) {
             setMasterNotes((prev) => `📅 [Meeting Notes: ${title} (${date})]\nURL: ${meetUrl}\n${notes}\n\n` + prev);
           }
+        }}
+        onAddTask={({ title, date, time, notes }) => {
+          const newItem: CalendarItem = {
+            id: 'cal_' + Date.now(),
+            title: `📌 ${title}`,
+            time: time || '10:00',
+            type: 'task',
+            durationMinutes: 30,
+            priority: 'high',
+            completed: false,
+            date: date || new Date().toISOString().split('T')[0],
+          };
+          setCalendarItems((prev) => [...prev, newItem]);
+          showToast(`SJ OS Calendar & Task Reminder synced for meeting`);
         }}
       />
 
@@ -1409,6 +1456,21 @@ export default function App() {
         isOpen={isSheetsModalOpen}
         onClose={() => setIsSheetsModalOpen(false)}
       />
+
+      {currentUser && (
+        <ProfileEditorModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          currentUser={currentUser}
+          onProfileUpdated={(updated) => {
+            setCurrentUser(updated);
+            if (authenticatedUser?.id === updated.id) {
+              setAuthenticatedUser(updated);
+            }
+            showToast('Profile updated & synced to Firebase!');
+          }}
+        />
+      )}
     </div>
   );
 }

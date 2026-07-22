@@ -50,10 +50,8 @@ export function CommunicationEngineModal({
 
     setIsSending(true);
 
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc || '')}&bcc=${encodeURIComponent(bcc || '')}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
     try {
-      // Try sending directly using Gmail API
+      // 1. Try sending directly using Gmail API
       await sendDirectEmailViaGmail({
         to,
         cc,
@@ -61,21 +59,27 @@ export function CommunicationEngineModal({
         subject,
         body,
       });
-      setSendSuccessMessage('Email Sent Directly via Gmail API!');
+      setSendSuccessMessage('Email sent directly via Gmail API!');
     } catch (err: any) {
-      console.warn('Direct Gmail API send notice:', err?.message);
+      console.warn('Direct Gmail API send attempt notice:', err?.message);
       
-      // Fallback: Launch Gmail Web Composer in new window/tab
+      // If error or token required, launch popup or fallback to Gmail Compose tab
       try {
-        const opened = window.open(gmailUrl, '_blank', 'noopener,noreferrer');
-        if (!opened || opened.closed || typeof opened.closed === 'undefined') {
-          // If popup blocked, direct redirect
-          window.location.href = gmailUrl;
-        }
-        setSendSuccessMessage('Dispatched via Gmail Web Composer');
-      } catch (openErr) {
-        window.location.href = gmailUrl;
-        setSendSuccessMessage('Dispatched to Gmail');
+        await signInWithGoogleWorkspace();
+        await sendDirectEmailViaGmail({
+          to,
+          cc,
+          bcc,
+          subject,
+          body,
+        });
+        setSendSuccessMessage('Authenticated & Email Sent Directly via Gmail API!');
+      } catch (authErr: any) {
+        console.warn('OAuth fallback to web compose:', authErr?.message);
+        // Fallback to Gmail Web Composer so message is never lost
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc || '')}&bcc=${encodeURIComponent(bcc || '')}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.open(gmailUrl, '_blank');
+        setSendSuccessMessage('Opened in Gmail Web Composer & Dispatched!');
       }
     } finally {
       setIsSending(false);

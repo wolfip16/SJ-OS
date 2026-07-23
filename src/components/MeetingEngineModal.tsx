@@ -45,7 +45,7 @@ export function MeetingEngineModal({
   const [createTaskReminder, setCreateTaskReminder] = useState(true);
   const [isCreated, setIsCreated] = useState(false);
 
-  const organizerEmail = currentUser?.email || currentUser?.googleId || 'reshab.jhunjhunwala@rbagarwalla.com';
+  const organizerEmail = currentUser?.email || currentUser?.googleId || 'admin@organization.com';
 
   if (!isOpen) return null;
 
@@ -356,11 +356,28 @@ export function MeetingEngineModal({
               </div>
             </div>
 
-            {/* Notes / Agenda */}
+            {/* Notes / Agenda & MoM Dispatch */}
             <div>
-              <label className="block text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1">
-                <FileText className="w-3 h-3 text-[#34C759]" /> Meeting Agenda & Notes (Docs)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[10px] uppercase font-bold text-gray-500 tracking-wider flex items-center gap-1">
+                  <FileText className="w-3 h-3 text-[#34C759]" /> Meeting Agenda & Minutes (MoM)
+                </label>
+                {notes.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const momSubject = `Minutes of Meeting (MoM): ${title || 'Executive Session'}`;
+                      const momBody = `MINUTES OF MEETING (MoM)\n------------------------------\nMeeting Title: ${title || 'Executive Session'}\nDate: ${date}\nTime: ${time}\nOrganizer: ${organizerEmail}\n\nAttendees:\n${attendees.length > 0 ? attendees.map(a => `- ${a}`).join('\n') : 'All Executive Members'}\n\nMeeting Minutes & Notes:\n${notes}\n\nGoogle Meet Link: ${meetUrl || 'https://meet.google.com/new'}`;
+                      
+                      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(attendees.join(','))}&su=${encodeURIComponent(momSubject)}&body=${encodeURIComponent(momBody)}`;
+                      window.open(gmailUrl, '_blank');
+                    }}
+                    className="text-[10px] font-bold text-[#007AFF] hover:underline cursor-pointer flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-200"
+                  >
+                    <span>📧 Mail This MoM</span>
+                  </button>
+                )}
+              </div>
               <textarea
                 rows={3}
                 placeholder="Key talking points, deliverables, or specifications..."

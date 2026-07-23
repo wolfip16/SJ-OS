@@ -30,6 +30,8 @@ export interface Contact {
   interactionCount: number;
   notes?: string;
   adminNotes?: string;
+  callFrequency?: 'Weekly' | 'Bi-Weekly' | 'Monthly' | 'Quarterly';
+  preferredCallTime?: 'Morning' | 'Afternoon' | 'Evening';
   createdAt: string;
 }
 
@@ -81,6 +83,7 @@ export interface CalendarItem {
   overdueRescheduled?: boolean;
   meetUrl?: string;
   attendees?: string[];
+  repeatRule?: 'none' | 'daily' | 'weekly' | 'monthly';
 }
 
 export interface DailyReview {

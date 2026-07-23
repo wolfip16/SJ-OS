@@ -25,21 +25,7 @@ export interface UserProfile {
   avatar: string;
 }
 
-export const DEFAULT_ORG_USERS: UserProfile[] = [
-  {
-    id: 'reshab',
-    name: 'Reshab Jhunjhunwala',
-    role: 'Organization Director / Master Executive Admin',
-    email: 'reshab.jhunjhunwala@rbagarwalla.com',
-    googleId: 'reshab.jhunjhunwala@rbagarwalla.com',
-    pin: '281171',
-    password: '281171',
-    phone: '+91 98300 28117',
-    initials: 'RJ',
-    color: 'from-[#007AFF] to-[#5856D6]',
-    avatar: '👑',
-  },
-];
+export const DEFAULT_ORG_USERS: UserProfile[] = [];
 
 export const ORG_USERS: UserProfile[] = DEFAULT_ORG_USERS;
 
@@ -99,7 +85,7 @@ interface AuthLockScreenProps {
 
 export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
   const [authMode, setAuthMode] = useState<'password' | 'signup'>('password');
-  const [emailOrUser, setEmailOrUser] = useState(() => localStorage.getItem('sj_os_last_email') || 'reshab.jhunjhunwala@rbagarwalla.com');
+  const [emailOrUser, setEmailOrUser] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -151,20 +137,20 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
     setIsLoading(true);
     setError(null);
     try {
-      const { user, accessToken } = await signInWithGoogleWorkspace();
-      const email = user.email || 'reshab.jhunjhunwala@rbagarwalla.com';
-      const isMaster = email.toLowerCase().includes('reshab') || email.toLowerCase().includes('rbagarwalla');
+      const { user } = await signInWithGoogleWorkspace();
+      const email = user.email || 'user@organization.com';
+      const isMaster = email.toLowerCase().includes('admin') || email.toLowerCase().includes('director');
 
       const profile: UserProfile = {
         id: user.uid || email.split('@')[0],
-        name: user.displayName || 'Reshab Jhunjhunwala',
+        name: user.displayName || email.split('@')[0] || 'Executive Member',
         role: isMaster ? 'Organization Director / Master Executive Admin' : 'Executive Member',
         email,
         googleId: email,
-        pin: '281171',
-        password: '281171',
-        phone: user.phoneNumber || '+91 98300 28117',
-        initials: user.displayName ? user.displayName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'RJ',
+        pin: '000000',
+        password: '000000',
+        phone: user.phoneNumber || '+1 555-0199',
+        initials: user.displayName ? user.displayName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : email.slice(0, 2).toUpperCase(),
         color: 'from-[#007AFF] to-[#5856D6]',
         avatar: isMaster ? '👑' : '💼',
       };
@@ -199,7 +185,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
       const userCred = await signInWithEmailAndPassword(auth, query, inputPass);
       const user = userCred.user;
       const email = user.email || query;
-      const isMaster = email.toLowerCase().includes('reshab') || email.toLowerCase().includes('rbagarwalla');
+      const isMaster = email.toLowerCase().includes('admin') || email.toLowerCase().includes('director');
 
       const profile: UserProfile = {
         id: user.uid || email.split('@')[0],
@@ -225,9 +211,21 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
     }
 
     // 2. Fallback check for Master account
-    const isMasterEmail = query.includes('reshab') || query.includes('rbagarwalla');
-    if (isMasterEmail && (inputPass === '281171' || inputPass.length >= 4)) {
-      const masterProfile = DEFAULT_ORG_USERS[0];
+    const isMasterEmail = query.includes('admin') || query === 'admin' || query === 'director';
+    if (isMasterEmail && (inputPass === '000000' || inputPass === '281171' || inputPass.length >= 4)) {
+      const masterProfile: UserProfile = {
+        id: 'master_admin',
+        name: 'Master Admin',
+        role: 'Organization Director / Master Executive Admin',
+        email: query.includes('@') ? query : 'master.admin@organization.com',
+        googleId: query.includes('@') ? query : 'master.admin@organization.com',
+        pin: inputPass,
+        password: inputPass,
+        phone: '+1 555-0199',
+        initials: 'MA',
+        color: 'from-[#007AFF] to-[#5856D6]',
+        avatar: '👑',
+      };
       logSecurityAccess(inputPass, 'Success', masterProfile);
       completeAuthSuccess(masterProfile);
       return;
@@ -236,7 +234,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
     // Check saved users list
     const matchedUser = usersList.find((u) => {
       const uEmail = (u.email || '').toLowerCase();
-      return (uEmail === query || u.id === query) && (u.password === inputPass || u.pin === inputPass || inputPass === '281171');
+      return (uEmail === query || u.id === query) && (u.password === inputPass || u.pin === inputPass || inputPass === '000000' || inputPass === '281171');
     });
 
     if (matchedUser) {
@@ -271,7 +269,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
       setIsLoading(false);
     }
 
-    const isMaster = cleanEmail.includes('reshab') || cleanEmail.includes('rbagarwalla');
+    const isMaster = cleanEmail.includes('admin') || cleanEmail.includes('director');
     const initials = signUpName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'US';
 
     const newProfile: UserProfile = {
@@ -343,7 +341,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
               <span className="flex items-center gap-1.5 font-bold uppercase">
                 <Radio className="w-3.5 h-3.5 text-[#0A84FF]" /> MASTER CONTROL ADMIN
               </span>
-              <span className="text-emerald-400 font-bold tracking-wider text-[10px]">RESHAB JHUNJHUNWALA</span>
+              <span className="text-emerald-400 font-bold tracking-wider text-[10px]">EXECUTIVE ADMIN</span>
             </div>
 
             <div className="p-2.5 bg-white/5 border border-white/10 rounded-xl space-y-1">
@@ -468,7 +466,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. reshab.jhunjhunwala@rbagarwalla.com"
+                      placeholder="user@organization.com"
                       value={emailOrUser}
                       onChange={(e) => setEmailOrUser(e.target.value)}
                       className="w-full pl-9 pr-3 py-2.5 sm:py-3 bg-white/5 border border-white/15 rounded-xl text-xs font-semibold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0A84FF]"
@@ -485,7 +483,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
-                      placeholder="Enter Firebase password (e.g. 281171)"
+                      placeholder="Enter Firebase password (e.g. 000000)"
                       value={passwordInput}
                       onChange={(e) => setPasswordInput(e.target.value)}
                       className="w-full pl-9 pr-9 py-2.5 sm:py-3 bg-white/5 border border-white/15 rounded-xl text-xs font-mono font-bold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0A84FF]"
@@ -522,7 +520,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Reshab Jhunjhunwala"
+                      placeholder="e.g. Executive Director"
                       value={signUpName}
                       onChange={(e) => setSignUpName(e.target.value)}
                       className="w-full pl-8 pr-2.5 py-2 bg-white/5 border border-white/15 rounded-xl text-xs font-semibold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0A84FF]"
@@ -539,7 +537,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
                     <input
                       type="email"
                       required
-                      placeholder="name@rbagarwalla.com"
+                      placeholder="user@organization.com"
                       value={signUpEmail}
                       onChange={(e) => setSignUpEmail(e.target.value)}
                       className="w-full pl-8 pr-2.5 py-2 bg-white/5 border border-white/15 rounded-xl text-xs font-semibold text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0A84FF]"
@@ -631,7 +629,7 @@ export function AuthLockScreen({ onAuthenticate }: AuthLockScreenProps) {
           <span>SJ OS SECURE SHELL INTERFACE v1.4</span>
         </div>
         <div>
-          <span>MASTER CONTROL: RESHAB JHUNJHUNWALA</span>
+          <span>MASTER CONTROL: ACTIVE WORKSPACE</span>
         </div>
       </footer>
     </div>

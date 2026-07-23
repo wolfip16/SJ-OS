@@ -43,6 +43,9 @@ import {
   Shield,
   LogOut,
   Crown,
+  CheckCircle2,
+  FileText,
+  X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -158,6 +161,28 @@ export default function App() {
   const [dismissedSuggestionIds, setDismissedSuggestionIds] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Theme Engine States (2 Themes: Light / Dark, with multiple accents)
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('sj_os_theme') as 'light' | 'dark') || 'light';
+  });
+  const [themeAccent, setThemeAccent] = useState<'blue' | 'emerald' | 'amber' | 'purple'>(() => {
+    return (localStorage.getItem('sj_os_accent') as any) || 'blue';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sj_os_theme', themeMode);
+    if (themeMode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [themeMode]);
+
+  useEffect(() => {
+    localStorage.setItem('sj_os_accent', themeAccent);
+    document.documentElement.setAttribute('data-accent', themeAccent);
+  }, [themeAccent]);
+
   // Workspace Engine Modals & Drawers States
   const [isMailModalOpen, setIsMailModalOpen] = useState(false);
   const [isMeetModalOpen, setIsMeetModalOpen] = useState(false);
@@ -167,6 +192,8 @@ export default function App() {
   const [isChatDrawerOpen, setIsChatDrawerOpen] = useState(false);
   const [isFirebaseModalOpen, setIsFirebaseModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isConcludeDayModalOpen, setIsConcludeDayModalOpen] = useState(false);
+  const [isNotepadModalOpen, setIsNotepadModalOpen] = useState(false);
   const [lastSyncedTime, setLastSyncedTime] = useState<string>('Just now');
 
   // Core OS Database States (scoped to currentUser)
@@ -181,6 +208,19 @@ export default function App() {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
+
+  // Event listener for adding new calendar items / task reminders
+  useEffect(() => {
+    const handleAddCalendarItem = (e: Event) => {
+      const customEvent = e as CustomEvent<CalendarItem>;
+      if (customEvent.detail) {
+        setCalendarItems((prev) => [...prev, customEvent.detail]);
+        showToast(`Added task reminder: "${customEvent.detail.title}"`);
+      }
+    };
+    window.addEventListener('sj_os_add_calendar_item', handleAddCalendarItem);
+    return () => window.removeEventListener('sj_os_add_calendar_item', handleAddCalendarItem);
+  }, []);
 
   // Keep authenticatedUser and currentUser synced to local storage
   useEffect(() => {
@@ -830,6 +870,10 @@ export default function App() {
     setSelectedContactId(null);
   };
 
+  const handleUpdateContact = (updated: Contact) => {
+    setContacts((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+  };
+
   if (!authenticatedUser) {
     return (
       <AuthLockScreen
@@ -873,84 +917,23 @@ export default function App() {
       )}
 
       {/* 1. Dynamic Header Navigation (Apple-style Translucent Navigation Bar) */}
-      <header className="border-b border-[#E5E5EA] bg-[#FFFFFF]/80 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-5 py-3 flex flex-col lg:flex-row items-center justify-between gap-4">
+      <header className="border-b border-gray-200 dark:border-[#2C2C2E] bg-white/90 dark:bg-[#1C1C1E]/90 backdrop-blur-xl sticky top-0 z-40 shadow-2xs">
+        <div className="max-w-[1920px] w-full mx-auto px-4 sm:px-6 lg:px-10 2xl:px-16 py-3 flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             {/* Native squircle app icon layout */}
-            <div className="bg-[#007AFF] text-white rounded-xl h-9 w-9 font-bold text-sm tracking-tight shadow-sm flex items-center justify-center relative overflow-hidden">
-              <span className="relative z-10 text-base font-semibold">SJ</span>
+            <div className="bg-[#007AFF] text-white rounded-xl h-9 w-9 font-extrabold text-sm tracking-tight shadow-sm flex items-center justify-center relative overflow-hidden">
+              <span className="relative z-10 text-base font-bold">SJ</span>
               <div className="absolute inset-0 bg-linear-to-b from-white/10 to-transparent pointer-events-none" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold tracking-tight text-[#1D1D1F] leading-none flex items-center gap-1.5">
+              <h1 className="text-sm font-extrabold tracking-tight text-gray-900 dark:text-white leading-none flex items-center gap-1.5">
                 SJ OS 
-                <span className="text-[10px] text-[#007AFF] font-medium px-1.5 py-0.5 rounded-md bg-[#007AFF]/10">ORGANIZATION v1.3</span>
+                <span className="text-[10px] text-[#007AFF] font-bold px-1.5 py-0.5 rounded-md bg-[#007AFF]/10 border border-[#007AFF]/20">ORGANIZATION v1.3</span>
               </h1>
-              <p className="text-[10px] text-[#8E8E93] font-medium uppercase tracking-wider mt-0.5">
+              <p className="text-[10px] text-gray-700 dark:text-gray-300 font-bold uppercase tracking-wider mt-0.5">
                 Executive Work Operating System
               </p>
             </div>
-          </div>
-
-          {/* PAGE NAVIGATION SEGMENTS (Separate pages, keeping current as master sheet) */}
-          <div className="flex flex-wrap items-center justify-center bg-[#F2F2F7] p-0.5 rounded-xl border border-[#E5E5EA] gap-0.5">
-            {(authenticatedUser.id === 'reshab' ||
-              authenticatedUser.id === 'admin' ||
-              authenticatedUser.email?.toLowerCase().includes('reshab') ||
-              authenticatedUser.role?.toLowerCase().includes('admin') ||
-              authenticatedUser.role?.toLowerCase().includes('director')) && (
-              <button
-                onClick={() => setActivePage('admin-deck')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activePage === 'admin-deck'
-                    ? 'bg-[#007AFF] text-white shadow-[0_2px_8px_rgba(0,122,255,0.3)] font-extrabold ring-2 ring-blue-300'
-                    : 'bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 border border-amber-500/30 font-bold'
-                }`}
-              >
-                <Crown className="w-3.5 h-3.5 text-amber-500" />
-                <span>Master Admin Deck</span>
-              </button>
-            )}
-            <button
-              onClick={() => setActivePage('master')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activePage === 'master'
-                  ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                  : 'text-[#8E8E93] hover:text-[#1D1D1F]'
-              }`}
-            >
-              Master Dashboard
-            </button>
-            <button
-              onClick={() => setActivePage('contacts')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activePage === 'contacts'
-                  ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                  : 'text-[#8E8E93] hover:text-[#1D1D1F]'
-              }`}
-            >
-              Partners Directory
-            </button>
-            <button
-              onClick={() => setActivePage('calendar')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activePage === 'calendar'
-                  ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                  : 'text-[#8E8E93] hover:text-[#1D1D1F]'
-              }`}
-            >
-              Living Calendar
-            </button>
-            <button
-              onClick={() => setActivePage('history')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activePage === 'history'
-                  ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                  : 'text-[#8E8E93] hover:text-[#1D1D1F]'
-              }`}
-            >
-              EOD Logs & History
-            </button>
           </div>
 
           {/* Quick Controls */}
@@ -958,12 +941,23 @@ export default function App() {
             {/* Intelligent build week button */}
             <button
               onClick={handleBuildMyWeek}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#F2F2F7] hover:bg-[#E5E5EA] text-[#1D1D1F] transition-all active:scale-95 cursor-pointer border border-[#E5E5EA]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#F2F2F7] dark:bg-neutral-800 hover:bg-[#E5E5EA] dark:hover:bg-neutral-700 text-[#1D1D1F] dark:text-white transition-all active:scale-95 cursor-pointer border border-[#E5E5EA] dark:border-neutral-700"
               title="Quietly analyzes pipeline and auto-creates optimized 5-day workload calendar"
               id="btn_build_week"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#FF9500]" />
               Build My Week
+            </button>
+
+            {/* Conclude the Day button */}
+            <button
+              onClick={() => setIsConcludeDayModalOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#007AFF] hover:bg-blue-600 text-white transition-all active:scale-95 cursor-pointer shadow-xs"
+              title="Conclude the day to trigger automated schedule sweep and workload balancing"
+              id="btn_conclude_day"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Conclude the Day
             </button>
  
             <BackupPortability
@@ -974,14 +968,35 @@ export default function App() {
               onImportContactsCSV={handleImportContactsCSV}
             />
 
-            <button
-              onClick={() => setShowHelp(!showHelp)}
-              className="p-2 rounded-full hover:bg-[#F2F2F7] text-[#8E8E93] hover:text-[#1D1D1F] transition cursor-pointer"
-              id="btn_help_info"
-              title="Help Info"
-            >
-              <HelpCircle className="w-4.5 h-4.5" />
-            </button>
+            {/* Theme Mode & Multiple Accent Options Selector */}
+            <div className="flex items-center gap-1 bg-[#E5E5EA]/60 dark:bg-[#1C1C1E] p-1 rounded-full border border-[#E5E5EA] dark:border-[#2C2C2E]">
+              <button
+                onClick={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}
+                className={`p-1.5 rounded-full transition cursor-pointer ${
+                  themeMode === 'dark' ? 'bg-[#007AFF] text-white shadow-xs' : 'text-[#8E8E93] hover:text-[#1D1D1F]'
+                }`}
+                title={`Switch to ${themeMode === 'light' ? 'Dark' : 'Light'} Theme`}
+              >
+                {themeMode === 'light' ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5" />}
+              </button>
+              
+              <div className="h-3 w-px bg-gray-300 dark:bg-neutral-700 mx-0.5" />
+
+              <div className="flex items-center gap-1 px-1">
+                {(['blue', 'emerald', 'amber', 'purple'] as const).map((acc) => (
+                  <button
+                    key={acc}
+                    onClick={() => setThemeAccent(acc)}
+                    className={`w-3.5 h-3.5 rounded-full transition cursor-pointer border ${
+                      acc === 'blue' ? 'bg-blue-500' : acc === 'emerald' ? 'bg-emerald-500' : acc === 'amber' ? 'bg-amber-500' : 'bg-purple-500'
+                    } ${
+                      themeAccent === acc ? 'ring-2 ring-offset-1 ring-gray-600 dark:ring-white scale-110' : 'opacity-70 hover:opacity-100'
+                    }`}
+                    title={`${acc.toUpperCase()} Accent Option`}
+                  />
+                ))}
+              </div>
+            </div>
 
             {/* User Profile Indicator & Logout */}
             <div className="flex items-center gap-2 border-l border-[#E5E5EA] pl-3.5 ml-1">
@@ -999,7 +1014,7 @@ export default function App() {
                     {currentUser?.name}
                   </span>
                   <span className="block text-[8px] text-[#007AFF] font-bold uppercase tracking-wider flex items-center gap-1">
-                    <span>{currentUser?.id === 'reshab' || currentUser?.id === 'admin' ? 'Master Admin' : 'Edit Profile'}</span>
+                    <span>{currentUser?.role?.toLowerCase().includes('admin') || currentUser?.id === 'admin' ? 'Master Admin' : 'Edit Profile'}</span>
                   </span>
                 </div>
               </button>
@@ -1057,7 +1072,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* 3. Main Operating System Shell Workspace */}
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-[1920px] w-full mx-auto px-4 sm:px-6 lg:px-10 2xl:px-16 py-6 space-y-6">
         {/* Workspace Google Infrastructure Engines Bar */}
         <WorkspaceEnginesBar
           onOpenMail={() => setIsMailModalOpen(true)}
@@ -1068,21 +1083,25 @@ export default function App() {
           onOpenSheets={() => setIsSheetsModalOpen(true)}
           onOpenCalendar={() => {
             setActivePage('calendar');
-            showToast('Opened Schedule (Living Calendar)');
+            showToast('Opened Live Calendar Schedule');
           }}
           onOpenContacts={() => {
             setActivePage('contacts');
             showToast('Opened Partners Directory');
           }}
           onOpenDocs={() => {
-            setActivePage('master');
-            showToast('Focused Business Memory (Executive Yellow Pad)');
+            setActivePage('history');
+            showToast('Opened Business Memory (Notepad & EOD Logs)');
           }}
           onOpenTasks={() => {
-            setActivePage('master');
-            showToast('Focused Today\'s Work (Task Engine)');
+            setActivePage('calendar');
+            showToast('Focused Today\'s Scheduled Work');
           }}
           onOpenFirebaseInfo={() => setIsFirebaseModalOpen(true)}
+          onOpenNotepad={() => setIsNotepadModalOpen(true)}
+          activePage={activePage}
+          onSelectPage={setActivePage}
+          isAdmin={!!(authenticatedUser.id === 'admin' || authenticatedUser.role?.toLowerCase().includes('admin') || authenticatedUser.role?.toLowerCase().includes('director'))}
         />
 
         {/* Dynamic Insight Advisor Banner */}
@@ -1170,6 +1189,7 @@ export default function App() {
               timelineEvents={timelineEvents}
               calendarItems={calendarItems}
               onAddContact={handleAddContact}
+              onUpdateContact={handleUpdateContact}
               onDeleteContact={handleDeleteContact}
               onSelectContact={setSelectedContactId}
               selectedContactId={selectedContactId}
@@ -1196,23 +1216,44 @@ export default function App() {
         )}
 
         {activePage === 'history' && (
-          <div className="w-full min-h-[700px] bg-white rounded-2xl border border-[#E5E5EA] p-6 space-y-6 animate-fadeIn text-[#1D1D1F]">
-            <div>
-              <h2 className="text-base font-bold text-[#1D1D1F]">EOD Logs & History Vault</h2>
-              <p className="text-xs text-[#8E8E93] font-medium mt-0.5">
-                Review, edit, and delete past alignment logs and explore the master stream of all partner timeline logs.
-              </p>
+          <div className="w-full min-h-[700px] bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-200 dark:border-[#2C2C2E] p-6 space-y-6 animate-fadeIn text-gray-900 dark:text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-150 dark:border-neutral-800 pb-4">
+              <div>
+                <h2 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                  <span>🧠</span> Business Memory Vault (Notepad & EOD Logs)
+                </h2>
+                <p className="text-xs text-gray-700 dark:text-gray-300 font-bold mt-0.5">
+                  Executive scratchpad notepad and complete history of all EOD realignment logs and partner activity audit logs.
+                </p>
+              </div>
             </div>
 
+            {/* Embedded Executive Scratchpad / Notepad */}
+            <div className="bg-[#FFFDEB]/90 dark:bg-[#2C2B1E] p-5 rounded-2xl border border-[#EBE3C5] dark:border-[#4A472E] shadow-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-[#EBE3C5]/60 mb-2">
+                <h3 className="text-xs font-bold uppercase text-[#857342] tracking-wider flex items-center gap-1.5">
+                  <span className="text-sm">✍️</span> Executive Yellow Pad (Business Memory Notepad)
+                </h3>
+                <span className="text-[9px] text-[#A69460] font-bold font-mono">AUTOSAVED</span>
+              </div>
+              <textarea
+                value={masterNotes}
+                onChange={(e) => setMasterNotes(e.target.value)}
+                placeholder="Scribble quick notes, client phone numbers, agendas, or design dimensions here..."
+                className="w-full min-h-[140px] bg-transparent text-xs text-[#423D2B] leading-relaxed focus:outline-hidden font-medium placeholder-[#B8AD8A] resize-none"
+              />
+            </div>
+
+            {/* EOD Realignment Logs & History Feed */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Left Column: Daily Reviews list (7 Cols) */}
               <div className="lg:col-span-7 space-y-4">
-                <h3 className="text-xs font-bold uppercase text-[#8E8E93] tracking-wider flex items-center gap-1">
-                  📅 Past Daily Realignment Reviews ({dailyReviews.length})
+                <h3 className="text-xs font-extrabold uppercase text-gray-800 dark:text-gray-200 tracking-wider flex items-center gap-1">
+                  📅 EOD Alignment Logs History ({dailyReviews.length})
                 </h3>
                 {dailyReviews.length === 0 ? (
-                  <div className="p-8 text-center text-[#8E8E93] border border-dashed border-[#E5E5EA] rounded-xl text-xs font-medium">
-                    No end-of-day reviews logged yet. Submit a review via the Alignment Desk below to populate this vault.
+                  <div className="p-8 text-center text-gray-700 dark:text-gray-300 border border-dashed border-gray-200 dark:border-neutral-700 rounded-xl text-xs font-bold">
+                    No end-of-day reviews logged yet. Submit a review via the Alignment Desk to populate this history.
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -1237,8 +1278,8 @@ export default function App() {
               </div>
 
               {/* Right Column: Global Timeline Event Stream (5 Cols) */}
-              <div className="lg:col-span-5 space-y-4 bg-[#F2F2F7]/50 p-4 rounded-xl border border-[#E5E5EA]">
-                <h3 className="text-xs font-bold uppercase text-[#8E8E93] tracking-wider">
+              <div className="lg:col-span-5 space-y-4 bg-gray-50 dark:bg-neutral-900 p-4 rounded-xl border border-gray-200 dark:border-neutral-800">
+                <h3 className="text-xs font-extrabold uppercase text-gray-800 dark:text-gray-200 tracking-wider">
                   📜 Global Activities Audit Feed
                 </h3>
                 <div className="max-h-[550px] overflow-y-auto space-y-2 pr-1 scrollbar-thin">
@@ -1259,17 +1300,17 @@ export default function App() {
                       }
                     };
                     return (
-                      <div key={ev.id} className="p-3 bg-white rounded-lg border border-[#E5E5EA] text-xs space-y-1">
+                      <div key={ev.id} className="p-3 bg-white dark:bg-neutral-800 rounded-lg border border-gray-200 dark:border-neutral-700 text-xs space-y-1">
                         <div className="flex items-center justify-between text-[10px] text-gray-400">
                           <span className="font-bold uppercase text-[#007AFF]">
                             {getEmoji(ev.type)} {ev.type}
                           </span>
                           <span>{new Date(ev.timestamp).toLocaleDateString()}</span>
                         </div>
-                        <div className="font-semibold text-[#1D1D1F]">{ev.title}</div>
-                        <p className="text-[10px] text-[#8E8E93] font-medium italic">Partner: {contactName}</p>
+                        <div className="font-semibold text-gray-900 dark:text-white">{ev.title}</div>
+                        <p className="text-[10px] text-gray-700 dark:text-gray-300 font-bold italic">Partner: {contactName}</p>
                         {ev.notes && (
-                          <p className="text-[10px] text-[#8E8E93] bg-[#F2F2F7]/30 p-1.5 rounded mt-1 border border-gray-100 whitespace-pre-wrap leading-relaxed">
+                          <p className="text-[10px] text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-neutral-900 p-1.5 rounded mt-1 border border-gray-200 dark:border-neutral-700 whitespace-pre-wrap leading-relaxed">
                             {ev.notes}
                           </p>
                         )}
@@ -1297,43 +1338,7 @@ export default function App() {
           />
         )}
 
-        {/* 4. Bottom Row: End of Day Realignment & Persistent Notes Area */}
-        <footer className="border-t border-[#E5E5EA] pt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Alignment Desk */}
-          <div className="lg:col-span-6 flex flex-col justify-between bg-white p-5 rounded-2xl border border-[#E5E5EA]">
-            <div>
-              <h3 className="text-xs font-bold uppercase text-[#8E8E93] tracking-wider flex items-center gap-1">
-                <span>🎯</span> SJ OS Alignment Desk
-              </h3>
-              <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5">
-                Conclude the day to trigger automated schedule sweep and workload balancing.
-              </p>
-            </div>
-
-            <div className="mt-4">
-              <DailyReviewComponent
-                onCompleteReview={handleCompleteDailyReview}
-                reviewsHistory={dailyReviews}
-              />
-            </div>
-          </div>
-
-          {/* Persistent Notes Area (Requirement 5) */}
-          <div className="lg:col-span-6 flex flex-col bg-[#FFFDEB]/90 p-5 rounded-2xl border border-[#EBE3C5] shadow-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-[#EBE3C5]/60 mb-2">
-              <h3 className="text-xs font-bold uppercase text-[#857342] tracking-wider flex items-center gap-1.5">
-                <span className="text-sm">✍️</span> Executive Yellow Pad (Persistent Scratchpad)
-              </h3>
-              <span className="text-[9px] text-[#A69460] font-bold font-mono">AUTOSAVED</span>
-            </div>
-            <textarea
-              value={masterNotes}
-              onChange={(e) => setMasterNotes(e.target.value)}
-              placeholder="Scribble quick notes, client phone numbers, agendas, or design dimensions here..."
-              className="w-full flex-1 min-h-[120px] bg-transparent text-xs text-[#423D2B] leading-relaxed focus:outline-hidden font-medium placeholder-[#B8AD8A] resize-none"
-            />
-          </div>
-        </footer>
+        {/* End of Main Content */}
       </main>
 
       {/* Dynamic Toast notification for app-wide feedback */}
@@ -1473,6 +1478,110 @@ export default function App() {
           }}
         />
       )}
+
+      {/* Conclude the Day / Alignment Desk Modal */}
+      <AnimatePresence>
+        {isConcludeDayModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-neutral-800 rounded-2xl p-6 max-w-2xl w-full shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-gray-150 dark:border-neutral-800">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950 text-[#007AFF]">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold text-gray-900 dark:text-white">
+                      SJ OS Alignment Desk — Conclude Today
+                    </h3>
+                    <p className="text-xs text-gray-500 font-bold">
+                      Review today's achievements, sweep unfinished tasks, and balance upcoming workload.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsConcludeDayModalOpen(false)}
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <DailyReviewComponent
+                onCompleteReview={(review) => {
+                  handleCompleteDailyReview(review);
+                  setIsConcludeDayModalOpen(false);
+                }}
+                reviewsHistory={dailyReviews}
+              />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Executive Notepad Modal */}
+      <AnimatePresence>
+        {isNotepadModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-neutral-800 rounded-2xl p-6 max-w-3xl w-full shadow-2xl relative space-y-4"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-gray-150 dark:border-neutral-800">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-xl bg-amber-500/15 text-amber-600">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold text-gray-900 dark:text-white">
+                      Executive Notepad (Yellow Pad)
+                    </h3>
+                    <p className="text-xs text-gray-500 font-bold">
+                      Persistent scratchpad for client phone numbers, agendas, quick ideas, and design notes.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsNotepadModalOpen(false)}
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="bg-[#FFFDEB] dark:bg-[#252319] p-5 rounded-2xl border border-[#EBE3C5] dark:border-[#4A452E] shadow-xs space-y-2">
+                <div className="flex items-center justify-between pb-2 border-b border-[#EBE3C5]/60 dark:border-[#4A452E]">
+                  <span className="text-xs font-extrabold uppercase text-[#857342] dark:text-amber-300 tracking-wider flex items-center gap-1.5">
+                    <span>✍️</span> Quick Notes Pad
+                  </span>
+                  <span className="text-[9px] text-[#A69460] dark:text-amber-400 font-mono font-extrabold">AUTOSAVED TO MEMORY</span>
+                </div>
+                <textarea
+                  value={masterNotes}
+                  onChange={(e) => setMasterNotes(e.target.value)}
+                  placeholder="Scribble quick notes, client phone numbers, agendas, or design dimensions here..."
+                  className="w-full h-72 bg-transparent text-xs text-[#423D2B] dark:text-amber-200 leading-relaxed focus:outline-hidden font-semibold placeholder-[#B8AD8A] dark:placeholder-amber-400/60 resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setIsNotepadModalOpen(false)}
+                  className="px-4 py-2 bg-[#007AFF] text-white text-xs font-extrabold rounded-xl hover:bg-blue-600 transition cursor-pointer shadow-xs"
+                >
+                  Save & Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   Search,
   Plus,
   Trash2,
+  Edit2,
   Phone,
   Mail,
   MapPin,
@@ -42,6 +43,7 @@ interface ContactsViewProps {
   timelineEvents: TimelineEvent[];
   calendarItems: CalendarItem[];
   onAddContact: (contactData: Omit<Contact, 'id' | 'interactionCount' | 'createdAt'>) => void;
+  onUpdateContact?: (updatedContact: Contact) => void;
   onDeleteContact: (id: string) => void;
   onSelectContact: (id: string | null) => void;
   selectedContactId: string | null;
@@ -53,6 +55,7 @@ export function ContactsView({
   timelineEvents,
   calendarItems,
   onAddContact,
+  onUpdateContact,
   onDeleteContact,
   onSelectContact,
   selectedContactId,
@@ -61,6 +64,11 @@ export function ContactsView({
   const [searchTerm, setSearchTerm] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [isAddingContact, setIsAddingContact] = useState(false);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [editPhone, setEditPhone] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editCallFreq, setEditCallFreq] = useState<'Weekly' | 'Bi-Weekly' | 'Monthly' | 'Quarterly'>('Weekly');
+  const [editCallTime, setEditCallTime] = useState<'Morning' | 'Afternoon' | 'Evening'>('Morning');
 
   // Mobile/Tablet responsive view switcher: 'list' or 'detail'
   const [mobileView, setMobileView] = useState<'list' | 'detail'>(selectedContactId ? 'detail' : 'list');
@@ -500,6 +508,19 @@ export function ContactsView({
                   </span>
                   <button
                     onClick={() => {
+                      setEditingContact(selectedContact);
+                      setEditPhone(selectedContact.phone || '');
+                      setEditEmail(selectedContact.email || '');
+                      setEditCallFreq(selectedContact.callFrequency || 'Weekly');
+                      setEditCallTime(selectedContact.preferredCallTime || 'Morning');
+                    }}
+                    className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/20 rounded-xl transition cursor-pointer"
+                    title="Edit Contact Profile"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
                       if (confirm(`Confirm deletion of partner directory profile "${selectedContact.company}"?`)) {
                         onDeleteContact(selectedContact.id);
                       }
@@ -514,7 +535,7 @@ export function ContactsView({
               </div>
 
               {/* Grid Specs */}
-              <div className="grid grid-cols-3 gap-2 text-[10px] font-semibold text-gray-550 dark:text-neutral-400 mt-3 pt-2.5 border-t border-gray-100/40 dark:border-neutral-800/40">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-semibold text-gray-550 dark:text-neutral-400 mt-3 pt-2.5 border-t border-gray-100/40 dark:border-neutral-800/40">
                 <div className="flex items-center gap-1">
                   <Phone className="w-3.5 h-3.5 text-gray-400" />
                   <span>{selectedContact.phone}</span>
@@ -524,8 +545,12 @@ export function ContactsView({
                   <span className="truncate">{selectedContact.email || 'N/A'}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                  <span>{selectedContact.city || 'No Address'}</span>
+                  <Clock className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Freq: {selectedContact.callFrequency || 'Weekly'}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Time: {selectedContact.preferredCallTime || 'Morning'}</span>
                 </div>
               </div>
 
@@ -1075,6 +1100,134 @@ export function ContactsView({
           </div>
         )}
       </div>
+      {/* Edit Partner Contact Modal */}
+      {editingContact && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl p-5 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-neutral-800 pb-3">
+              <div>
+                <h3 className="text-sm font-extrabold text-gray-900 dark:text-white">
+                  Edit Directory Profile: {editingContact.name}
+                </h3>
+                <p className="text-[10px] text-amber-500 font-bold uppercase tracking-wider">
+                  {editingContact.company}
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingContact(null)}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const updated: Contact = {
+                  ...editingContact,
+                  phone: editPhone,
+                  email: editEmail,
+                  callFrequency: editCallFreq,
+                  preferredCallTime: editCallTime,
+                };
+
+                if (onUpdateContact) {
+                  onUpdateContact(updated);
+                } else {
+                  // Fallback local update
+                  const saved = localStorage.getItem('sj_os_contacts');
+                  if (saved) {
+                    const list: Contact[] = JSON.parse(saved);
+                    const idx = list.findIndex(c => c.id === updated.id);
+                    if (idx !== -1) {
+                      list[idx] = updated;
+                      localStorage.setItem('sj_os_contacts', JSON.stringify(list));
+                      window.dispatchEvent(new Event('storage'));
+                    }
+                  }
+                }
+                setEditingContact(null);
+              }}
+              className="space-y-3 text-xs"
+            >
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-gray-500 dark:text-neutral-400 mb-1">
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl font-medium text-gray-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-gray-500 dark:text-neutral-400 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl font-medium text-gray-900 dark:text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] uppercase font-bold text-gray-500 dark:text-neutral-400 mb-1">
+                    Call Frequency
+                  </label>
+                  <select
+                    value={editCallFreq}
+                    onChange={(e) => setEditCallFreq(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl font-medium text-gray-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="Weekly">Every Week</option>
+                    <option value="Bi-Weekly">Every 2 Weeks</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Quarterly">Quarterly</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] uppercase font-bold text-gray-500 dark:text-neutral-400 mb-1">
+                    Preferred Time
+                  </label>
+                  <select
+                    value={editCallTime}
+                    onChange={(e) => setEditCallTime(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl font-medium text-gray-900 dark:text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="Morning">Morning</option>
+                    <option value="Afternoon">Afternoon</option>
+                    <option value="Evening">Evening</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-neutral-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingContact(null)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 font-bold text-xs rounded-xl hover:bg-gray-200 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                >
+                  Save Profile Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

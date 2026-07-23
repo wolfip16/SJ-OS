@@ -17,6 +17,7 @@ import {
   CheckSquare,
   Database,
   Sparkles,
+  Crown,
 } from 'lucide-react';
 
 interface WorkspaceEnginesBarProps {
@@ -29,8 +30,12 @@ interface WorkspaceEnginesBarProps {
   onOpenCalendar: () => void;
   onOpenContacts: () => void;
   onOpenDocs: () => void;
-  onOpenTasks: () => void;
+  onOpenTasks?: () => void;
   onOpenFirebaseInfo: () => void;
+  onOpenNotepad?: () => void;
+  activePage?: string;
+  onSelectPage?: (page: 'master' | 'contacts' | 'calendar' | 'history' | 'admin-deck') => void;
+  isAdmin?: boolean;
 }
 
 export function WorkspaceEnginesBar({
@@ -45,6 +50,10 @@ export function WorkspaceEnginesBar({
   onOpenDocs,
   onOpenTasks,
   onOpenFirebaseInfo,
+  onOpenNotepad,
+  activePage = 'master',
+  onSelectPage,
+  isAdmin = false,
 }: WorkspaceEnginesBarProps) {
   const engines = [
     {
@@ -66,7 +75,7 @@ export function WorkspaceEnginesBar({
     {
       id: 'drive',
       name: 'Files',
-      googleEquivalent: 'Google Drive / Picker',
+      googleEquivalent: 'Drive / Picker',
       icon: HardDrive,
       color: 'bg-[#5856D6]/10 text-[#5856D6] hover:bg-[#5856D6] hover:text-white border-[#5856D6]/20',
       action: onOpenDrive,
@@ -98,7 +107,7 @@ export function WorkspaceEnginesBar({
     {
       id: 'calendar',
       name: 'Schedule',
-      googleEquivalent: 'Google Calendar',
+      googleEquivalent: 'Calendar',
       icon: Calendar,
       color: 'bg-blue-500/10 text-blue-600 hover:bg-blue-600 hover:text-white border-blue-500/20',
       action: onOpenCalendar,
@@ -106,7 +115,7 @@ export function WorkspaceEnginesBar({
     {
       id: 'contacts',
       name: 'Directory',
-      googleEquivalent: 'Google Contacts',
+      googleEquivalent: 'Contacts',
       icon: Users,
       color: 'bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-white border-indigo-500/20',
       action: onOpenContacts,
@@ -114,18 +123,10 @@ export function WorkspaceEnginesBar({
     {
       id: 'docs',
       name: 'Business Memory',
-      googleEquivalent: 'Google Docs',
+      googleEquivalent: 'Docs & Logs',
       icon: FileText,
       color: 'bg-sky-500/10 text-sky-600 hover:bg-sky-600 hover:text-white border-sky-500/20',
       action: onOpenDocs,
-    },
-    {
-      id: 'tasks',
-      name: 'Today\'s Work',
-      googleEquivalent: 'Google Tasks',
-      icon: CheckSquare,
-      color: 'bg-amber-500/10 text-amber-600 hover:bg-amber-600 hover:text-white border-amber-500/20',
-      action: onOpenTasks,
     },
     {
       id: 'firebase',
@@ -138,20 +139,64 @@ export function WorkspaceEnginesBar({
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-150 p-3 shadow-xs space-y-2">
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-[#007AFF]" />
-          <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-gray-700">
-            Google Workspace Infrastructure Engines
-          </h2>
+    <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-200 dark:border-[#2C2C2E] p-2.5 sm:p-3 shadow-xs space-y-2.5">
+      {/* Top Header Row of Unified Toolbar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pb-2 border-b border-gray-150 dark:border-[#2C2C2E]">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-[#007AFF] shrink-0" />
+          <div>
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-gray-900 dark:text-gray-100 leading-none">
+              Workspace Unified Toolbar
+            </h2>
+            <p className="text-[10px] text-gray-500 font-bold mt-0.5">
+              Integrated Engines & Navigation Deck
+            </p>
+          </div>
         </div>
-        <span className="text-[9px] font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md font-mono">
-          SJ OS UNIFIED
-        </span>
+
+        {/* Integrated Navigation Tabs: Merged Workspace, Notepad, & Admin Control */}
+        {onSelectPage && (
+          <div className="flex flex-wrap items-center bg-gray-100 dark:bg-neutral-900 p-0.5 rounded-xl border border-gray-200 dark:border-neutral-800 gap-1">
+            <button
+              onClick={() => onSelectPage('master')}
+              className={`px-3.5 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+                activePage === 'master'
+                  ? 'bg-[#007AFF] text-white shadow-xs'
+                  : 'text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white'
+              }`}
+            >
+              Workspace
+            </button>
+
+            <button
+              onClick={() => onOpenNotepad ? onOpenNotepad() : onOpenDocs()}
+              className="px-3 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1 bg-amber-500/10 text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 border border-amber-500/30"
+              title="Open Executive Notepad / Scratchpad"
+            >
+              <FileText className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              Notepad
+            </button>
+
+            {isAdmin && (
+              <button
+                onClick={() => onSelectPage('admin-deck')}
+                className={`px-3.5 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1 ${
+                  activePage === 'admin-deck'
+                    ? 'bg-[#007AFF] text-white shadow-xs'
+                    : 'bg-amber-500/15 text-amber-800 dark:text-amber-300 hover:bg-amber-500/25 border border-amber-500/30'
+                }`}
+                title="Admin Control Center"
+              >
+                <Crown className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                Admin Control
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-11 gap-1.5">
+      {/* Engines Grid - 10 Equal Columns on Large Screens */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-1.5">
         {engines.map((eng) => {
           const Icon = eng.icon;
           return (
@@ -159,13 +204,13 @@ export function WorkspaceEnginesBar({
               key={eng.id}
               onClick={eng.action}
               title={`${eng.name} — ${eng.googleEquivalent}`}
-              className={`p-2 rounded-xl border text-xs font-bold transition-all duration-150 flex flex-col items-center justify-center gap-0.5 text-center cursor-pointer group ${eng.color}`}
+              className={`p-1.5 sm:p-2 rounded-xl border text-xs font-bold transition-all duration-150 flex flex-col items-center justify-center gap-0.5 text-center cursor-pointer group ${eng.color}`}
             >
-              <Icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
-              <span className="text-[10px] tracking-tight leading-tight block truncate w-full font-bold">
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-transform group-hover:scale-110" />
+              <span className="text-[10px] tracking-tight leading-tight block truncate w-full font-extrabold text-gray-900 dark:text-white">
                 {eng.name}
               </span>
-              <span className="text-[8px] opacity-75 font-mono tracking-tighter truncate w-full">
+              <span className="text-[8px] font-mono tracking-tighter truncate w-full font-bold text-gray-600 dark:text-gray-400">
                 ({eng.googleEquivalent.replace('Google ', '')})
               </span>
             </button>

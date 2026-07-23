@@ -317,6 +317,24 @@ export function SheetsManagerModal({ isOpen, onClose }: SheetsManagerModalProps)
 
               <div className="flex items-center gap-2">
                 <button
+                  onClick={() => {
+                    if (sheets.length <= 1) {
+                      alert('Cannot delete the last remaining sheet.');
+                      return;
+                    }
+                    if (confirm(`Are you sure you want to delete the sheet "${currentSheet.title}"?`)) {
+                      const updated = sheets.filter(s => s.id !== currentSheet.id);
+                      setSheets(updated);
+                      setActiveSheetId(updated[0].id);
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-xl border border-red-200 flex items-center gap-1 cursor-pointer transition"
+                  title="Delete Sheet"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-red-600" /> Delete Sheet
+                </button>
+
+                <button
                   onClick={handleAddRow}
                   className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200 flex items-center gap-1 cursor-pointer transition"
                 >

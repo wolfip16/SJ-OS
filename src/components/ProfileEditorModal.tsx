@@ -35,7 +35,7 @@ export function ProfileEditorModal({
   const [email, setEmail] = useState(currentUser.email || '');
   const [googleId, setGoogleId] = useState(currentUser.googleId || currentUser.email || '');
   const [phone, setPhone] = useState(currentUser.phone || '+91 98300 00000');
-  const [password, setPassword] = useState(currentUser.password || currentUser.pin || '281171');
+  const [password, setPassword] = useState(currentUser.password || currentUser.pin || '000000');
   const [avatar, setAvatar] = useState(currentUser.avatar || '💼');
   const [color, setColor] = useState(currentUser.color || 'from-[#007AFF] to-[#5856D6]');
   const [isSaved, setIsSaved] = useState(false);
@@ -46,7 +46,7 @@ export function ProfileEditorModal({
   const handleGoogleSync = () => {
     setGoogleSyncing(true);
     setTimeout(() => {
-      const gEmail = email.includes('@') ? email : `${currentUser.id}@rbagarwalla.com`;
+      const gEmail = email.includes('@') ? email : `${currentUser.id}@organization.com`;
       setGoogleId(gEmail);
       setGoogleSyncing(false);
     }, 800);
@@ -234,7 +234,7 @@ export function ProfileEditorModal({
               className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl text-xs font-mono font-bold text-gray-900 focus:outline-none focus:border-emerald-500 shadow-xs"
             />
             <p className="text-[9px] text-gray-500 font-medium">
-              Used for Firebase authentication and lock screen unlock. (Admin Reshab password is set to 281171).
+              Used for Firebase authentication and lock screen unlock.
             </p>
           </div>
 

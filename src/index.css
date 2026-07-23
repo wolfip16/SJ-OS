@@ -1,29 +1,87 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
+:root {
+  --color-accent: #007AFF;
+  --color-accent-hover: #0056B3;
+  --color-accent-light: rgba(0, 122, 255, 0.12);
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+[data-accent="emerald"] {
+  --color-accent: #10B981;
+  --color-accent-hover: #059669;
+  --color-accent-light: rgba(16, 185, 129, 0.15);
+}
+
+[data-accent="amber"] {
+  --color-accent: #F59E0B;
+  --color-accent-hover: #D97706;
+  --color-accent-light: rgba(245, 158, 11, 0.15);
+}
+
+[data-accent="purple"] {
+  --color-accent: #8B5CF6;
+  --color-accent-hover: #7C3AED;
+  --color-accent-light: rgba(139, 92, 246, 0.15);
+}
+
+/* Dynamic CSS class overrides to make themeAccent selection work across the app */
+.bg-\[\#007AFF\], .bg-blue-600 {
+  background-color: var(--color-accent) !important;
+}
+.text-\[\#007AFF\], .text-blue-600 {
+  color: var(--color-accent) !important;
+}
+.border-\[\#007AFF\], .border-blue-500 {
+  border-color: var(--color-accent) !important;
+}
+.ring-\[\#007AFF\] {
+  --tw-ring-color: var(--color-accent) !important;
+}
+
 @theme {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
 }
 
+/* Ensure text is dark and crisp on light backgrounds and bright white on dark */
+body {
+  font-family: var(--font-sans);
+  background-color: #F8F9FA;
+  color: #111827;
+}
+
+.dark body {
+  background-color: #0F172A;
+  color: #F8FAFC;
+}
+
 @layer utilities {
   /* Minimal scrollbar custom support */
   .scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.25);
+    background: rgba(156, 163, 175, 0.4);
     border-radius: 9999px;
   }
   .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(75, 85, 99, 0.4);
+    background: rgba(100, 116, 139, 0.5);
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: rgba(156, 163, 175, 0.45);
+    background: rgba(107, 114, 128, 0.7);
   }
 }
+
 

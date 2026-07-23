@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Folder, HardDrive, FileText, Upload, Search, Check, X, ExternalLink, Image, FileSpreadsheet, Plus, RefreshCw, Loader2 } from 'lucide-react';
+import { Folder, HardDrive, FileText, Upload, Search, Check, X, ExternalLink, Image, FileSpreadsheet, Plus, RefreshCw, Loader2, FolderPlus, Trash2 } from 'lucide-react';
 import { listDirectDriveFiles } from '../lib/workspaceAuth';
 
 interface DrivePickerModalProps {
@@ -27,8 +27,38 @@ export function DrivePickerModal({ isOpen, onClose, onSelectFile }: DrivePickerM
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const [isSyncingDrive, setIsSyncingDrive] = useState(false);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
 
   if (!isOpen) return null;
+
+  const handleCreateFolder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFolderName.trim()) return;
+    const newFolderObj = {
+      id: 'f_' + Date.now(),
+      name: newFolderName.trim(),
+      size: 'Folder Directory',
+      type: 'folder',
+      folder: 'Root Workspace',
+      modified: new Date().toISOString().split('T')[0],
+    };
+    setFiles([newFolderObj, ...files]);
+    setUploadNotice(`Folder "${newFolderName.trim()}" created successfully in Google Drive.`);
+    setNewFolderName('');
+    setIsCreatingFolder(false);
+    setTimeout(() => setUploadNotice(null), 3000);
+  };
+
+  const handleDeleteFile = (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Are you sure you want to delete "${name}" from Drive?`)) {
+      setFiles((prev) => prev.filter((f) => f.id !== id));
+      if (selectedFileId === id) setSelectedFileId(null);
+      setUploadNotice(`Deleted "${name}" from Google Drive.`);
+      setTimeout(() => setUploadNotice(null), 3000);
+    }
+  };
 
   const handleSyncLiveDrive = async () => {
     setIsSyncingDrive(true);
@@ -130,7 +160,16 @@ export function DrivePickerModal({ isOpen, onClose, onSelectFile }: DrivePickerM
             <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2" />
           </div>
 
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+            <button
+              onClick={() => setIsCreatingFolder(!isCreatingFolder)}
+              className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold text-xs rounded-xl cursor-pointer flex items-center gap-1.5 transition active:scale-95 shadow-xs"
+              title="Create new folder directory in Drive"
+            >
+              <FolderPlus className="w-3.5 h-3.5" />
+              <span>Create Folder</span>
+            </button>
+
             <button
               onClick={handleSyncLiveDrive}
               disabled={isSyncingDrive}
@@ -140,23 +179,50 @@ export function DrivePickerModal({ isOpen, onClose, onSelectFile }: DrivePickerM
               {isSyncingDrive ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Syncing Drive...</span>
+                  <span>Syncing...</span>
                 </>
               ) : (
                 <>
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Sync Live Drive</span>
+                  <span>Sync Drive</span>
                 </>
               )}
             </button>
 
             <label className="px-3 py-1.5 bg-[#5856D6] hover:bg-indigo-600 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center gap-1.5 transition shadow-xs">
               <Upload className="w-3.5 h-3.5" />
-              <span>Upload New File</span>
+              <span>Upload File</span>
               <input type="file" onChange={handleSimulatedUpload} className="hidden" />
             </label>
           </div>
         </div>
+
+        {isCreatingFolder && (
+          <form onSubmit={handleCreateFolder} className="bg-purple-50 border-b border-purple-200 p-3 flex items-center gap-2 animate-fadeIn">
+            <Folder className="w-4 h-4 text-purple-600 shrink-0" />
+            <input
+              type="text"
+              required
+              placeholder="Enter new folder name (e.g. Architectural Designs)"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              className="flex-1 px-3 py-1.5 bg-white border border-purple-300 rounded-lg text-xs font-semibold text-gray-900 focus:outline-none focus:border-purple-600"
+            />
+            <button
+              type="submit"
+              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-lg transition active:scale-95 cursor-pointer"
+            >
+              Create
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCreatingFolder(false)}
+              className="p-1.5 text-gray-400 hover:text-gray-600 font-bold"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </form>
+        )}
 
         {uploadNotice && (
           <div className="bg-indigo-50 border-b border-indigo-100 text-indigo-700 text-xs font-bold px-4 py-2 flex items-center justify-between">
@@ -173,18 +239,20 @@ export function DrivePickerModal({ isOpen, onClose, onSelectFile }: DrivePickerM
               <div
                 key={file.id}
                 onClick={() => setSelectedFileId(file.id)}
-                className={`p-3 rounded-xl flex items-center justify-between cursor-pointer transition ${
+                className={`p-3 rounded-xl flex items-center justify-between cursor-pointer transition group ${
                   isSelected ? 'bg-indigo-50/80 border border-indigo-200' : 'hover:bg-gray-50/80 border border-transparent'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-indigo-100/50 text-[#5856D6] rounded-xl">
-                    {file.type === 'sheet' ? (
+                    {file.type === 'folder' ? (
+                      <Folder className="w-5 h-5 text-purple-600" />
+                    ) : file.type === 'sheet' ? (
                       <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
                     ) : file.type === 'pdf' ? (
                       <FileText className="w-5 h-5 text-red-500" />
                     ) : (
-                      <Folder className="w-5 h-5 text-[#5856D6]" />
+                      <FileText className="w-5 h-5 text-[#5856D6]" />
                     )}
                   </div>
 
@@ -201,6 +269,13 @@ export function DrivePickerModal({ isOpen, onClose, onSelectFile }: DrivePickerM
                     {file.folder}
                   </span>
                   {isSelected && <Check className="w-4 h-4 text-[#5856D6] font-bold" />}
+                  <button
+                    onClick={(e) => handleDeleteFile(file.id, file.name, e)}
+                    className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition cursor-pointer ml-1"
+                    title={`Delete ${file.name} from Drive`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             );

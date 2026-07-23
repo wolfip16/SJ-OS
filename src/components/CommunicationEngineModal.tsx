@@ -40,7 +40,7 @@ export function CommunicationEngineModal({
   const [isSending, setIsSending] = useState(false);
   const [sendSuccessMessage, setSendSuccessMessage] = useState('Sent Directly via Gmail API');
 
-  const senderEmail = currentUser?.email || currentUser?.googleId || 'reshab.jhunjhunwala@rbagarwalla.com';
+  const senderEmail = currentUser?.email || currentUser?.googleId || 'admin@organization.com';
 
   if (!isOpen) return null;
 
@@ -239,7 +239,7 @@ export function CommunicationEngineModal({
                   </label>
                   <input
                     type="email"
-                    placeholder="e.g., records@rbagarwalla.com"
+                    placeholder="e.g., records@organization.com"
                     value={bcc}
                     onChange={(e) => setBcc(e.target.value)}
                     className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#007AFF] transition"

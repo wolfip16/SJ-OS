@@ -197,8 +197,8 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
         id: newId,
         name: empName.trim(),
         role: empRole.trim(),
-        email: `${newId}@rbagarwalla.com`,
-        googleId: `${newId}@rbagarwalla.com`,
+        email: `${newId}@organization.com`,
+        googleId: `${newId}@organization.com`,
         pin: empPin.trim(),
         password: empPin.trim(),
         initials: empName.trim().split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
@@ -418,27 +418,27 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
   const activeReviewsAgenda = reviewStaffId ? getTargetUserCalendar(reviewStaffId).filter(item => item.date === reviewDate) : [];
 
   return (
-    <div className="space-y-6 text-[#1D1D1F] animate-fadeIn">
+    <div className="space-y-6 text-[#1D1D1F] dark:text-gray-100 animate-fadeIn">
       {/* 1. Header & Navigation Rails */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-gray-200 pb-5">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-gray-200 dark:border-neutral-800 pb-5">
         <div>
-          <h2 className="text-lg font-bold tracking-tight text-gray-900 flex items-center gap-2">
+          <h2 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
             <Crown className="w-5 h-5 text-amber-500" />
             Executive Office Control Deck
           </h2>
-          <p className="text-xs text-gray-500 font-semibold mt-0.5">
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-0.5">
             Oversee personnel rosters, allocate workload targets, broadcast directives, and audit daily operations.
           </p>
         </div>
 
         {/* Dynamic Navigation Tabs Segmented Control */}
-        <div className="bg-[#E3E3E9] p-0.5 rounded-xl flex items-center border border-gray-200 shrink-0">
+        <div className="bg-[#E3E3E9] dark:bg-neutral-800 p-0.5 rounded-xl flex items-center border border-gray-200 dark:border-neutral-700 shrink-0">
           <button
             onClick={() => setTab('dashboard')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               tab === 'dashboard'
-                ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                : 'text-gray-500 hover:text-[#1D1D1F]'
+                ? 'bg-white dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                : 'text-gray-500 dark:text-gray-400 hover:text-[#1D1D1F] dark:hover:text-white'
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
@@ -448,8 +448,8 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
             onClick={() => setTab('employees')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               tab === 'employees'
-                ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                : 'text-gray-500 hover:text-[#1D1D1F]'
+                ? 'bg-white dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                : 'text-gray-500 dark:text-gray-400 hover:text-[#1D1D1F] dark:hover:text-white'
             }`}
           >
             <UserPlus className="w-3.5 h-3.5" />
@@ -459,8 +459,8 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
             onClick={() => setTab('tasks')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               tab === 'tasks'
-                ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                : 'text-gray-500 hover:text-[#1D1D1F]'
+                ? 'bg-white dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                : 'text-gray-500 dark:text-gray-400 hover:text-[#1D1D1F] dark:hover:text-white'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
@@ -470,8 +470,8 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
             onClick={() => setTab('eod_logs')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               tab === 'eod_logs'
-                ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                : 'text-gray-500 hover:text-[#1D1D1F]'
+                ? 'bg-white dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                : 'text-gray-500 dark:text-gray-400 hover:text-[#1D1D1F] dark:hover:text-white'
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
@@ -481,8 +481,8 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
             onClick={() => setTab('security_logs')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               tab === 'security_logs'
-                ? 'bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                : 'text-gray-500 hover:text-[#1D1D1F]'
+                ? 'bg-white dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-white shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                : 'text-gray-500 dark:text-gray-400 hover:text-[#1D1D1F] dark:hover:text-white'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -498,57 +498,57 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
         <div className="space-y-6">
           {/* Key Metric Blocks */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl border border-gray-150 p-5 shadow-xs flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-blue-50 text-[#007AFF] flex items-center justify-center">
+            <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#007AFF] dark:text-blue-400 flex items-center justify-center">
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <span className="block text-[10px] text-[#8E8E93] font-bold uppercase tracking-wider">Active Staff Profiles</span>
-                <span className="text-xl font-bold">{employeesList.length - 1} Employees</span>
+                <span className="block text-[10px] text-[#8E8E93] dark:text-gray-400 font-bold uppercase tracking-wider">Active Staff Profiles</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">{employeesList.length - 1} Employees</span>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-150 p-5 shadow-xs flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-emerald-50 text-[#34C759] flex items-center justify-center">
+            <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-[#34C759] dark:text-emerald-400 flex items-center justify-center">
                 <Calendar className="w-5 h-5" />
               </div>
               <div>
-                <span className="block text-[10px] text-[#8E8E93] font-bold uppercase tracking-wider">Managed Partners</span>
-                <span className="text-xl font-bold">
+                <span className="block text-[10px] text-[#8E8E93] dark:text-gray-400 font-bold uppercase tracking-wider">Managed Partners</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">
                   {userStats.reduce((sum, u) => sum + u.contactsCount, 0)} Profiles
                 </span>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-150 p-5 shadow-xs flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-purple-50 text-[#AF52DE] flex items-center justify-center">
+            <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-[#AF52DE] dark:text-purple-400 flex items-center justify-center">
                 <Award className="w-5 h-5" />
               </div>
               <div>
-                <span className="block text-[10px] text-[#8E8E93] font-bold uppercase tracking-wider">Avg Pipeline Heat</span>
-                <span className="text-xl font-bold">
+                <span className="block text-[10px] text-[#8E8E93] dark:text-gray-400 font-bold uppercase tracking-wider">Avg Pipeline Heat</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">
                   {Math.round(userStats.reduce((sum, u) => sum + u.avgHeat, 0) / (userStats.length || 1))}% Heat
                 </span>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-150 p-5 shadow-xs flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-amber-50 text-[#FF9500] flex items-center justify-center">
+            <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-[#FF9500] dark:text-amber-400 flex items-center justify-center">
                 <Zap className="w-5 h-5" />
               </div>
               <div>
-                <span className="block text-[10px] text-[#8E8E93] font-bold uppercase tracking-wider">Total EOD Log Files</span>
-                <span className="text-xl font-bold">{allReviews.length} Submitted</span>
+                <span className="block text-[10px] text-[#8E8E93] dark:text-gray-400 font-bold uppercase tracking-wider">Total EOD Log Files</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">{allReviews.length} Submitted</span>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Master Team Directory table */}
-            <div className="lg:col-span-8 bg-white rounded-2xl border border-gray-150 overflow-hidden shadow-xs p-5 space-y-4">
+            <div className="lg:col-span-8 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 overflow-hidden shadow-xs p-5 space-y-4">
               <div>
-                <h2 className="text-sm font-bold text-[#1D1D1F]">Master Personnel Directory</h2>
-                <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5">
+                <h2 className="text-sm font-bold text-[#1D1D1F] dark:text-white">Master Personnel Directory</h2>
+                <p className="text-[11px] text-[#8E8E93] dark:text-gray-400 font-medium mt-0.5">
                   Supervise operational workflows, track objective completion metrics, and enter individual enclaves.
                 </p>
               </div>
@@ -556,7 +556,7 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-gray-100 text-[9px] uppercase font-extrabold text-[#8E8E93] tracking-widest pb-3">
+                    <tr className="border-b border-gray-100 dark:border-neutral-800 text-[9px] uppercase font-extrabold text-[#8E8E93] dark:text-gray-400 tracking-widest pb-3">
                       <th className="pb-3 pr-2">Team Member</th>
                       <th className="pb-3 px-2">Role Title</th>
                       <th className="pb-3 px-2 text-center">Partners</th>
@@ -565,26 +565,26 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                       <th className="pb-3 pl-2 text-right">Workspace Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50 text-xs font-semibold">
+                  <tbody className="divide-y divide-gray-50 dark:divide-neutral-800 text-xs font-semibold">
                     {userStats.map((u) => (
-                      <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-neutral-800/50 transition-colors">
                         <td className="py-3.5 pr-2 flex items-center gap-2.5">
                           <div className={`h-8.5 w-8.5 rounded-xl bg-linear-to-br ${u.color} text-white font-bold text-[10px] flex items-center justify-center relative overflow-hidden shrink-0 shadow-xs`}>
                             {u.initials}
                             <span className="absolute bottom-0.5 right-0.5 text-[8px] opacity-80">{u.avatar}</span>
                           </div>
                           <div>
-                            <span className="block font-bold text-[#1D1D1F]">{u.name}</span>
-                            <span className="text-[9px] text-gray-400 font-bold font-mono">PIN: {u.pin}</span>
+                            <span className="block font-bold text-[#1D1D1F] dark:text-white">{u.name}</span>
+                            <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold font-mono">PIN: {u.pin}</span>
                           </div>
                         </td>
-                        <td className="py-3.5 px-2 text-gray-500 text-[11px] font-semibold">{u.role}</td>
-                        <td className="py-3.5 px-2 text-center font-bold text-[#007AFF]">{u.contactsCount}</td>
+                        <td className="py-3.5 px-2 text-gray-500 dark:text-gray-300 text-[11px] font-semibold">{u.role}</td>
+                        <td className="py-3.5 px-2 text-center font-bold text-[#007AFF] dark:text-blue-400">{u.contactsCount}</td>
                         <td className="py-3.5 px-2 text-center">
                           <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${
                             u.completedToday === u.totalToday && u.totalToday > 0
-                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                              : 'bg-gray-100 text-gray-600 border border-gray-150'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900'
+                              : 'bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-300 border border-gray-150 dark:border-neutral-700'
                           }`}>
                             {u.completedToday}/{u.totalToday} Done
                           </span>
@@ -601,7 +601,7 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                           </button>
                           <button
                             onClick={() => handleResetUserSandbox(u.id, u.name)}
-                            className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 cursor-pointer transition"
+                            className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer transition"
                             title="Reset entire sandbox database to defaults"
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
@@ -615,12 +615,12 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
             </div>
 
             {/* Broadcast Board */}
-            <div className="lg:col-span-4 bg-white rounded-2xl border border-gray-150 shadow-xs p-5 space-y-4">
-              <div className="flex items-center gap-2 text-amber-600">
+            <div className="lg:col-span-4 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 shadow-xs p-5 space-y-4">
+              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
                 <Send className="w-4 h-4 fill-amber-500/10" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-600">Executive Directive Broadcast</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Executive Directive Broadcast</h3>
               </div>
-              <p className="text-[11px] text-gray-500 leading-relaxed font-semibold">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed font-semibold">
                 Draft a global corporate directive. This message will instantly mount at the top of all employees' active workspaces for mandatory operational compliance.
               </p>
 
@@ -628,13 +628,13 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                 value={broadcastMessage}
                 onChange={(e) => setBroadcastMessage(e.target.value)}
                 placeholder="e.g. Action Required: Please verify material delivery logs with clients on today's agenda before 5:00 PM."
-                className="w-full text-xs p-3.5 border border-gray-200 rounded-xl h-28 focus:outline-hidden focus:ring-1 focus:ring-amber-500 font-medium placeholder-gray-400 resize-none leading-relaxed"
+                className="w-full text-xs p-3.5 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-xl h-28 focus:outline-hidden focus:ring-1 focus:ring-amber-500 font-medium placeholder-gray-400 dark:placeholder-gray-500 resize-none leading-relaxed"
               />
 
               <button
                 onClick={handleBroadcast}
                 disabled={!broadcastMessage.trim()}
-                className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-150 disabled:text-gray-400 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-98"
+                className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-150 dark:disabled:bg-neutral-800 disabled:text-gray-400 dark:disabled:text-neutral-600 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-98"
               >
                 <Send className="w-3.5 h-3.5" />
                 Broadcast To Directory
@@ -648,54 +648,54 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
       {tab === 'employees' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Employee Add/Edit Form */}
-          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-150 p-5 shadow-xs space-y-4">
+          <div className="lg:col-span-5 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-gray-900">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                 {editingEmployeeId ? 'Modify Credentials & Profile' : 'Register New Personnel Profile'}
               </h3>
-              <p className="text-[11px] text-gray-500 font-medium mt-0.5">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">
                 {editingEmployeeId ? 'Update access codes, roles, and profile settings.' : 'Hire or enroll a new team member with custom passcode access.'}
               </p>
             </div>
 
             <form onSubmit={handleAddOrEditEmployee} className="space-y-3.5">
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Employee Name</label>
+                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Employee Name</label>
                 <input
                   type="text"
                   value={empName}
                   onChange={(e) => setEmpName(e.target.value)}
                   placeholder="e.g. Vikram Malhotra"
-                  className="w-full text-xs font-semibold p-2.5 border border-gray-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                  className="w-full text-xs font-semibold p-2.5 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Corporate Role / Title</label>
+                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Corporate Role / Title</label>
                 <input
                   type="text"
                   value={empRole}
                   onChange={(e) => setEmpRole(e.target.value)}
                   placeholder="e.g. Regional Logistics Architect"
-                  className="w-full text-xs font-semibold p-2.5 border border-gray-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                  className="w-full text-xs font-semibold p-2.5 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Secure Passcode PIN (4 digits)</label>
+                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Secure Passcode PIN (4 digits)</label>
                 <input
                   type="text"
                   maxLength={4}
                   value={empPin}
                   onChange={(e) => setEmpPin(e.target.value)}
                   placeholder="e.g. 7777"
-                  className="w-full text-xs font-mono font-bold p-2.5 border border-gray-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                  className="w-full text-xs font-mono font-bold p-2.5 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-amber-500"
                 />
               </div>
 
               {/* Avatar Preset Grid */}
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Avatar Symbol</label>
+                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Avatar Symbol</label>
                 <div className="flex flex-wrap gap-1.5">
                   {AVATAR_PRESETS.map(av => (
                     <button
@@ -704,8 +704,8 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                       onClick={() => setEmpAvatar(av)}
                       className={`h-8 w-8 text-sm flex items-center justify-center rounded-lg border cursor-pointer transition-all ${
                         empAvatar === av 
-                          ? 'bg-amber-50 border-amber-400 scale-105 shadow-xs font-bold' 
-                          : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                          ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-400 scale-105 shadow-xs font-bold' 
+                          : 'bg-gray-50 dark:bg-neutral-800 border-gray-200 dark:border-neutral-700 hover:bg-gray-100 dark:hover:bg-neutral-700'
                       }`}
                     >
                       {av}
@@ -716,7 +716,7 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
 
               {/* Color Gradient presets */}
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Aesthetic Accent Theme</label>
+                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Aesthetic Accent Theme</label>
                 <div className="grid grid-cols-2 gap-2">
                   {COLOR_PRESETS.map(c => (
                     <button
@@ -725,12 +725,12 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                       onClick={() => setEmpColor(c.value)}
                       className={`p-2 rounded-xl text-left border cursor-pointer flex items-center gap-2 text-[10px] font-bold transition-all ${
                         empColor === c.value
-                          ? 'border-amber-400 bg-amber-50/10 shadow-xs'
-                          : 'border-gray-100 hover:border-gray-200 bg-white'
+                          ? 'border-amber-400 bg-amber-50/10 dark:bg-amber-950/20 shadow-xs'
+                          : 'border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700 bg-white dark:bg-neutral-900'
                       }`}
                     >
                       <div className={`h-4.5 w-4.5 rounded-md bg-linear-to-br ${c.value}`} />
-                      <span className="truncate text-gray-700">{c.name}</span>
+                      <span className="truncate text-gray-700 dark:text-gray-300">{c.name}</span>
                     </button>
                   ))}
                 </div>
@@ -753,7 +753,7 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                       setEmpRole('');
                       setEmpPin('');
                     }}
-                    className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-500 cursor-pointer transition"
+                    className="p-2.5 bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 rounded-xl text-xs font-bold text-gray-500 dark:text-gray-300 cursor-pointer transition"
                   >
                     Cancel
                   </button>
@@ -763,17 +763,17 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
           </div>
 
           {/* Current Roster Renders */}
-          <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-150 p-5 shadow-xs space-y-4">
+          <div className="lg:col-span-7 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-gray-900">Active Operational Directory</h3>
-              <p className="text-[11px] text-gray-500 font-medium mt-0.5">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white">Active Operational Directory</h3>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">
                 Review PIN access credentials, update titles, or adjust payroll profiles.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {employeesList.map(emp => (
-                <div key={emp.id} className="p-4 rounded-xl border border-gray-150 hover:border-gray-200 transition-all bg-white relative flex flex-col justify-between h-36">
+                <div key={emp.id} className="p-4 rounded-xl border border-gray-150 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700 transition-all bg-white dark:bg-neutral-900 relative flex flex-col justify-between h-36">
                   <div>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2.5">
@@ -782,25 +782,25 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                           <span className="absolute bottom-0.5 right-0.5 text-[9px]">{emp.avatar}</span>
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-gray-900 truncate max-w-[140px]">{emp.name}</h4>
-                          <span className="block text-[9px] text-gray-500 font-semibold truncate max-w-[140px] uppercase tracking-wider">{emp.role}</span>
+                          <h4 className="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[140px]">{emp.name}</h4>
+                          <span className="block text-[9px] text-gray-500 dark:text-gray-400 font-semibold truncate max-w-[140px] uppercase tracking-wider">{emp.role}</span>
                         </div>
                       </div>
                       
                       {emp.id === 'admin' ? (
-                        <span className="text-[8px] bg-amber-500/10 text-amber-600 font-bold px-1.5 py-0.5 rounded-full border border-amber-500/20 uppercase">
+                        <span className="text-[8px] bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold px-1.5 py-0.5 rounded-full border border-amber-500/20 uppercase">
                           System Owner
                         </span>
                       ) : (
-                        <span className="text-[9px] font-mono font-bold bg-gray-100 text-gray-600 border border-gray-200 px-1.5 py-0.5 rounded-md">
+                        <span className="text-[9px] font-mono font-bold bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-neutral-700 px-1.5 py-0.5 rounded-md">
                           PIN: {emp.pin}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-gray-50 pt-3 mt-2">
-                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                  <div className="flex items-center justify-between border-t border-gray-50 dark:border-neutral-800 pt-3 mt-2">
+                    <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">
                       ID: {emp.id}
                     </span>
 
@@ -808,14 +808,14 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => handleEditEmployeeClick(emp)}
-                          className="p-1.5 bg-gray-50 hover:bg-gray-150 text-gray-500 hover:text-amber-600 rounded-lg transition cursor-pointer"
+                          className="p-1.5 bg-gray-50 dark:bg-neutral-800 hover:bg-gray-150 text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg transition cursor-pointer"
                           title="Edit titles & access codes"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteEmployee(emp.id, emp.name)}
-                          className="p-1.5 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-lg transition cursor-pointer"
+                          className="p-1.5 bg-gray-50 dark:bg-neutral-800 hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-400 hover:text-red-500 rounded-lg transition cursor-pointer"
                           title="Disenroll from workspace directory"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -834,21 +834,21 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
       {tab === 'tasks' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Assign New Task Section */}
-          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-150 p-5 shadow-xs space-y-4">
+          <div className="lg:col-span-5 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-gray-900">Dispatch Task Target</h3>
-              <p className="text-[11px] text-gray-500 font-medium mt-0.5">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white">Dispatch Task Target</h3>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">
                 Inject custom directives directly onto individual personnel agendas.
               </p>
             </div>
 
             <form onSubmit={handleAssignTask} className="space-y-3.5">
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Target Recipient</label>
+                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Target Recipient</label>
                 <select
                   value={taskTargetUserId}
                   onChange={(e) => setTaskTargetUserId(e.target.value)}
-                  className="w-full text-xs font-semibold p-2.5 border border-gray-200 rounded-xl bg-white focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                  className="w-full text-xs font-semibold p-2.5 border border-gray-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-amber-500"
                 >
                   {employeesList.filter(u => u.id !== 'admin').map(emp => (
                     <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
@@ -857,23 +857,23 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Action Description Title</label>
+                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Action Description Title</label>
                 <input
                   type="text"
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
                   placeholder="e.g. Call client to verify site cladding layout draft"
-                  className="w-full text-xs font-semibold p-2.5 border border-gray-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                  className="w-full text-xs font-semibold p-2.5 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-amber-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Category type</label>
+                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Category type</label>
                   <select
                     value={taskType}
                     onChange={(e) => setTaskType(e.target.value as CalendarItemType)}
-                    className="w-full text-xs font-semibold p-2.5 border border-gray-200 rounded-xl bg-white focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                    className="w-full text-xs font-semibold p-2.5 border border-gray-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-amber-500"
                   >
                     <option value="call">📞 Phone / Call</option>
                     <option value="meeting">🤝 Client Meeting</option>
@@ -886,11 +886,11 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Priority Rank</label>
+                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Priority Rank</label>
                   <select
                     value={taskPriority}
                     onChange={(e) => setTaskPriority(e.target.value as any)}
-                    className="w-full text-xs font-semibold p-2.5 border border-gray-200 rounded-xl bg-white focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                    className="w-full text-xs font-semibold p-2.5 border border-gray-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-amber-500"
                   >
                     <option value="high">🔴 High Importance</option>
                     <option value="medium">🟡 Medium Priority</option>
@@ -901,42 +901,42 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Due Date</label>
+                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Due Date</label>
                   <input
                     type="date"
                     value={taskDate}
                     onChange={(e) => setTaskDate(e.target.value)}
-                    className="w-full text-xs font-semibold p-2 border border-gray-200 rounded-xl focus:outline-hidden"
+                    className="w-full text-xs font-semibold p-2 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-xl focus:outline-hidden"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Due Time</label>
+                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Due Time</label>
                   <input
                     type="text"
                     value={taskTime}
                     onChange={(e) => setTaskTime(e.target.value)}
                     placeholder="10:00"
-                    className="w-full text-xs font-semibold p-2 border border-gray-200 rounded-xl focus:outline-hidden text-center"
+                    className="w-full text-xs font-semibold p-2 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-xl focus:outline-hidden text-center"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Minutes</label>
+                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Minutes</label>
                   <input
                     type="number"
                     value={taskDuration}
                     onChange={(e) => setTaskDuration(Number(e.target.value))}
-                    className="w-full text-xs font-semibold p-2 border border-gray-200 rounded-xl focus:outline-hidden text-center"
+                    className="w-full text-xs font-semibold p-2 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-xl focus:outline-hidden text-center"
                   />
                 </div>
               </div>
 
               {/* Linked Partner list if existing */}
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Link to Partner Profile (Optional)</label>
+                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Link to Partner Profile (Optional)</label>
                 <select
                   value={taskContactId}
                   onChange={(e) => setTaskContactId(e.target.value)}
-                  className="w-full text-xs font-semibold p-2.5 border border-gray-200 rounded-xl bg-white focus:outline-hidden focus:ring-1 focus:ring-amber-500"
+                  className="w-full text-xs font-semibold p-2.5 border border-gray-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-amber-500"
                 >
                   <option value="">-- No linked profile --</option>
                   {reviewContacts.map(c => (
@@ -956,24 +956,24 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
           </div>
 
           {/* Review & Toggle Assigned Tasks Grid */}
-          <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-150 p-5 shadow-xs space-y-4">
+          <div className="lg:col-span-7 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-bold text-gray-900">Agenda Auditor & Objective Review</h3>
-                <p className="text-[11px] text-gray-500 font-medium mt-0.5">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Agenda Auditor & Objective Review</h3>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">
                   Audit and change operational objectives, mark completes, or cancel tasks live.
                 </p>
               </div>
             </div>
 
             {/* Selection Controls for audit */}
-            <div className="grid grid-cols-2 gap-3 bg-gray-50 p-3 rounded-xl border border-gray-150">
+            <div className="grid grid-cols-2 gap-3 bg-gray-50 dark:bg-neutral-800 p-3 rounded-xl border border-gray-150 dark:border-neutral-700">
               <div>
-                <label className="block text-[9px] uppercase tracking-wider font-bold text-gray-400 mb-1">Target Personnel</label>
+                <label className="block text-[9px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-300 mb-1">Target Personnel</label>
                 <select
                   value={reviewStaffId}
                   onChange={(e) => setReviewStaffId(e.target.value)}
-                  className="w-full text-xs font-semibold p-2 border border-gray-200 rounded-lg bg-white"
+                  className="w-full text-xs font-semibold p-2 border border-gray-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
                 >
                   {employeesList.filter(u => u.id !== 'admin').map(emp => (
                     <option key={emp.id} value={emp.id}>{emp.name}</option>
@@ -982,12 +982,12 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
               </div>
 
               <div>
-                <label className="block text-[9px] uppercase tracking-wider font-bold text-gray-400 mb-1">Due Date</label>
+                <label className="block text-[9px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-300 mb-1">Due Date</label>
                 <input
                   type="date"
                   value={reviewDate}
                   onChange={(e) => setReviewDate(e.target.value)}
-                  className="w-full text-xs font-semibold p-1.5 border border-gray-200 rounded-lg"
+                  className="w-full text-xs font-semibold p-1.5 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-lg"
                 />
               </div>
             </div>
@@ -995,12 +995,12 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
             {/* List of active tasks */}
             <div className="space-y-3">
               {activeReviewsAgenda.length === 0 ? (
-                <div className="p-10 text-center text-gray-400 border border-dashed border-gray-200 rounded-xl text-xs font-medium">
+                <div className="p-10 text-center text-gray-400 dark:text-gray-500 border border-dashed border-gray-200 dark:border-neutral-800 rounded-xl text-xs font-medium">
                   No active objectives scheduled for this staff member on {reviewDate}.
                 </div>
               ) : (
                 activeReviewsAgenda.map(task => (
-                  <div key={task.id} className="p-3.5 bg-white rounded-xl border border-gray-150 shadow-2xs flex items-center justify-between gap-3 hover:border-gray-200 transition-all">
+                  <div key={task.id} className="p-3.5 bg-white dark:bg-neutral-900 rounded-xl border border-gray-150 dark:border-neutral-800 shadow-2xs flex items-center justify-between gap-3 hover:border-gray-200 dark:hover:border-neutral-700 transition-all">
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
@@ -1008,17 +1008,17 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                         className={`h-5 w-5 rounded-md border flex items-center justify-center transition cursor-pointer shrink-0 ${
                           task.completed 
                             ? 'bg-[#34C759] border-transparent text-white' 
-                            : 'border-gray-300 hover:border-[#007AFF] hover:bg-gray-50'
+                            : 'border-gray-300 dark:border-neutral-700 hover:border-[#007AFF] hover:bg-gray-50 dark:hover:bg-neutral-800'
                         }`}
                       >
                         {task.completed && <Check className="w-3.5 h-3.5 font-bold" />}
                       </button>
 
                       <div>
-                        <h4 className={`text-xs font-bold leading-tight ${task.completed ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                        <h4 className={`text-xs font-bold leading-tight ${task.completed ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-900 dark:text-white'}`}>
                           {task.title}
                         </h4>
-                        <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-400 font-bold font-mono">
+                        <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-400 dark:text-gray-500 font-bold font-mono">
                           <span className="uppercase">{task.type}</span>
                           <span>•</span>
                           <span>{task.time} ({task.durationMinutes}m)</span>
@@ -1032,7 +1032,7 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
 
                     <button
                       onClick={() => handleDeleteTargetTask(reviewStaffId, task.id)}
-                      className="p-1.5 text-gray-300 hover:text-red-500 rounded-lg hover:bg-red-50 transition cursor-pointer"
+                      className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition cursor-pointer"
                       title="Delete task from workload"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -1047,16 +1047,16 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
 
       {/* TAB D: EOD LOGS AUDIT (Daily alignment reports audit) */}
       {tab === 'eod_logs' && (
-        <div className="bg-white rounded-2xl border border-gray-150 p-5 shadow-xs space-y-4">
+        <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs space-y-4">
           <div>
-            <h2 className="text-sm font-bold text-[#1D1D1F]">Daily EOD Logs & Alignment Audit</h2>
-            <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5">
+            <h2 className="text-sm font-bold text-[#1D1D1F] dark:text-white">Daily EOD Logs & Alignment Audit</h2>
+            <p className="text-[11px] text-[#8E8E93] dark:text-gray-400 font-medium mt-0.5">
               Review, moderate, or edit daily work reports completed by directory staff at shift conclusions.
             </p>
           </div>
 
           {allReviews.length === 0 ? (
-            <div className="p-8 text-center text-gray-400 border border-dashed border-gray-200 rounded-xl text-xs font-medium">
+            <div className="p-8 text-center text-gray-400 dark:text-gray-500 border border-dashed border-gray-200 dark:border-neutral-800 rounded-xl text-xs font-medium">
               No daily EOD alignment reviews logged by staff yet. Daily reports will display here instantly when submitted.
             </div>
           ) : (
@@ -1065,15 +1065,15 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                 const isEditing = editingReviewId === rev.id && editingReviewUser === rev.userId;
                 
                 return (
-                  <div key={`${rev.userId}_${rev.id}`} className="p-4 bg-white rounded-xl border border-gray-150 space-y-3 shadow-2xs">
-                    <div className="flex items-center justify-between border-b border-gray-50 pb-2">
+                  <div key={`${rev.userId}_${rev.id}`} className="p-4 bg-white dark:bg-neutral-900 rounded-xl border border-gray-150 dark:border-neutral-800 space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between border-b border-gray-50 dark:border-neutral-800 pb-2">
                       <div className="flex items-center gap-2">
                         <div className={`h-6.5 w-6.5 rounded-lg bg-linear-to-br ${rev.userColor} text-white font-extrabold text-[8px] flex items-center justify-center`}>
                           {rev.userInitials}
                         </div>
                         <div>
-                          <span className="block text-[11px] font-extrabold text-[#1D1D1F]">{rev.userName}</span>
-                          <span className="block text-[8px] text-gray-400 font-bold font-mono">SUBMITTED: {new Date(rev.completedAt).toLocaleDateString()}</span>
+                          <span className="block text-[11px] font-extrabold text-[#1D1D1F] dark:text-white">{rev.userName}</span>
+                          <span className="block text-[8px] text-gray-400 dark:text-gray-500 font-bold font-mono">SUBMITTED: {new Date(rev.completedAt).toLocaleDateString()}</span>
                         </div>
                       </div>
 
@@ -1082,13 +1082,13 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                           <>
                             <button
                               onClick={() => handleSaveEditedReview(rev.userId, rev.id)}
-                              className="text-emerald-600 hover:underline cursor-pointer"
+                              className="text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
                             >
                               Save
                             </button>
                             <button
                               onClick={() => setEditingReviewId(null)}
-                              className="text-gray-400 hover:underline cursor-pointer"
+                              className="text-gray-400 dark:text-gray-500 hover:underline cursor-pointer"
                             >
                               Cancel
                             </button>
@@ -1103,13 +1103,13 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                                 setEditBlockers(rev.blockers || '');
                                 setEditTomorrow(rev.tomorrowPriorities || '');
                               }}
-                              className="text-gray-400 hover:text-[#007AFF] cursor-pointer flex items-center gap-0.5"
+                              className="text-gray-400 dark:text-gray-500 hover:text-[#007AFF] dark:hover:text-blue-400 cursor-pointer flex items-center gap-0.5"
                             >
                               <Edit3 className="w-3 h-3" /> Edit
                             </button>
                             <button
                               onClick={() => handleDeleteReview(rev.userId, rev.id)}
-                              className="text-gray-400 hover:text-red-500 cursor-pointer flex items-center gap-0.5"
+                              className="text-gray-400 dark:text-gray-500 hover:text-red-500 cursor-pointer flex items-center gap-0.5"
                             >
                               <Trash2 className="w-3 h-3" /> Delete
                             </button>
@@ -1121,31 +1121,31 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                     {isEditing ? (
                       <div className="space-y-2 text-xs">
                         <div>
-                          <label className="block text-[8px] uppercase tracking-wider text-gray-400 font-bold mb-0.5">Wins</label>
-                          <input type="text" value={editWins} onChange={(e) => setEditWins(e.target.value)} className="w-full p-2 border border-gray-200 rounded-lg text-xs" />
+                          <label className="block text-[8px] uppercase tracking-wider text-gray-400 dark:text-gray-400 font-bold mb-0.5">Wins</label>
+                          <input type="text" value={editWins} onChange={(e) => setEditWins(e.target.value)} className="w-full p-2 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-lg text-xs" />
                         </div>
                         <div>
-                          <label className="block text-[8px] uppercase tracking-wider text-gray-400 font-bold mb-0.5">Blockers</label>
-                          <input type="text" value={editBlockers} onChange={(e) => setEditBlockers(e.target.value)} className="w-full p-2 border border-gray-200 rounded-lg text-xs" />
+                          <label className="block text-[8px] uppercase tracking-wider text-gray-400 dark:text-gray-400 font-bold mb-0.5">Blockers</label>
+                          <input type="text" value={editBlockers} onChange={(e) => setEditBlockers(e.target.value)} className="w-full p-2 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-lg text-xs" />
                         </div>
                         <div>
-                          <label className="block text-[8px] uppercase tracking-wider text-gray-400 font-bold mb-0.5">Tomorrow's Priorities</label>
-                          <input type="text" value={editTomorrow} onChange={(e) => setEditTomorrow(e.target.value)} className="w-full p-2 border border-gray-200 rounded-lg text-xs" />
+                          <label className="block text-[8px] uppercase tracking-wider text-gray-400 dark:text-gray-400 font-bold mb-0.5">Tomorrow's Priorities</label>
+                          <input type="text" value={editTomorrow} onChange={(e) => setEditTomorrow(e.target.value)} className="w-full p-2 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white border border-gray-200 dark:border-neutral-700 rounded-lg text-xs" />
                         </div>
                       </div>
                     ) : (
                       <div className="grid grid-cols-3 gap-2 text-[10px] leading-relaxed">
-                        <div className="bg-emerald-50/20 p-2 rounded-lg border border-emerald-100/40">
-                          <span className="block text-[8px] uppercase tracking-wider text-emerald-600 font-bold mb-0.5">🏆 Wins</span>
-                          <p className="text-gray-700 font-semibold truncate" title={rev.wins}>{rev.wins || 'None logged.'}</p>
+                        <div className="bg-emerald-50/20 dark:bg-emerald-950/30 p-2 rounded-lg border border-emerald-100/40 dark:border-emerald-900/40">
+                          <span className="block text-[8px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold mb-0.5">🏆 Wins</span>
+                          <p className="text-gray-700 dark:text-gray-300 font-semibold truncate" title={rev.wins}>{rev.wins || 'None logged.'}</p>
                         </div>
-                        <div className="bg-rose-50/20 p-2 rounded-lg border border-rose-100/40">
-                          <span className="block text-[8px] uppercase tracking-wider text-rose-500 font-bold mb-0.5">🛑 Blockers</span>
-                          <p className="text-gray-700 font-semibold truncate" title={rev.blockers}>{rev.blockers || 'None logged.'}</p>
+                        <div className="bg-rose-50/20 dark:bg-rose-950/30 p-2 rounded-lg border border-rose-100/40 dark:border-rose-900/40">
+                          <span className="block text-[8px] uppercase tracking-wider text-rose-500 dark:text-rose-400 font-bold mb-0.5">🛑 Blockers</span>
+                          <p className="text-gray-700 dark:text-gray-300 font-semibold truncate" title={rev.blockers}>{rev.blockers || 'None logged.'}</p>
                         </div>
-                        <div className="bg-blue-50/20 p-2 rounded-lg border border-blue-100/40">
-                          <span className="block text-[8px] uppercase tracking-wider text-blue-600 font-bold mb-0.5">🎯 Tomorrow</span>
-                          <p className="text-gray-700 font-semibold truncate" title={rev.tomorrowPriorities}>{rev.tomorrowPriorities || 'None.'}</p>
+                        <div className="bg-blue-50/20 dark:bg-blue-950/30 p-2 rounded-lg border border-blue-100/40 dark:border-blue-900/40">
+                          <span className="block text-[8px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-bold mb-0.5">🎯 Tomorrow</span>
+                          <p className="text-gray-700 dark:text-gray-300 font-semibold truncate" title={rev.tomorrowPriorities}>{rev.tomorrowPriorities || 'None.'}</p>
                         </div>
                       </div>
                     )}
@@ -1161,32 +1161,32 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
       {tab === 'security_logs' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: Credentials Matrix (Requirement 2) */}
-          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-150 p-5 shadow-xs space-y-4">
+          <div className="lg:col-span-5 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs space-y-4">
             <div>
-              <h2 className="text-sm font-bold text-[#1D1D1F] flex items-center gap-1.5">
+              <h2 className="text-sm font-bold text-[#1D1D1F] dark:text-white flex items-center gap-1.5">
                 <Crown className="w-4 h-4 text-amber-500" />
                 Organization Passcode Matrix
               </h2>
-              <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5">
+              <p className="text-[11px] text-[#8E8E93] dark:text-gray-400 font-medium mt-0.5">
                 Secure reference ledger of all employee security PIN codes. Only accessible under this administrative terminal.
               </p>
             </div>
 
-            <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-100">
+            <div className="border border-gray-100 dark:border-neutral-800 rounded-xl overflow-hidden divide-y divide-gray-100 dark:divide-neutral-800">
               {employeesList.map((emp) => (
-                <div key={emp.id} className="p-3.5 flex items-center justify-between text-xs hover:bg-gray-50/50 transition">
+                <div key={emp.id} className="p-3.5 flex items-center justify-between text-xs hover:bg-gray-50/50 dark:hover:bg-neutral-800/50 transition">
                   <div className="flex items-center gap-2.5">
                     <div className={`h-8 w-8 rounded-lg bg-linear-to-br ${emp.color} text-white font-extrabold text-[10px] flex items-center justify-center`}>
                       {emp.initials}
                     </div>
                     <div>
-                      <span className="block font-bold text-gray-800">{emp.name}</span>
-                      <span className="block text-[9px] text-[#8E8E93] uppercase font-bold tracking-wider">{emp.role}</span>
+                      <span className="block font-bold text-gray-800 dark:text-gray-200">{emp.name}</span>
+                      <span className="block text-[9px] text-[#8E8E93] dark:text-gray-400 uppercase font-bold tracking-wider">{emp.role}</span>
                     </div>
                   </div>
                   
                   <div className="text-right">
-                    <span className="inline-block bg-[#007AFF]/10 text-[#007AFF] font-mono font-bold px-3 py-1 rounded-lg text-xs tracking-wider border border-[#007AFF]/20">
+                    <span className="inline-block bg-[#007AFF]/10 dark:bg-blue-950/50 text-[#007AFF] dark:text-blue-400 font-mono font-bold px-3 py-1 rounded-lg text-xs tracking-wider border border-[#007AFF]/20 dark:border-blue-900/50">
                       {emp.pin}
                     </span>
                   </div>
@@ -1194,20 +1194,20 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
               ))}
             </div>
 
-            <div className="p-3 bg-blue-50/30 border border-blue-100/50 rounded-xl">
-              <span className="block text-[10px] font-bold text-[#007AFF] uppercase tracking-wider mb-1">💡 SECURITY RULES NOTICE</span>
-              <p className="text-[10px] text-[#8E8E93] leading-relaxed font-medium">
-                Admin credentials (PIN: <strong className="text-[#007AFF]">2710</strong>) grant full root command oversight. Staff passcodes can be configured anytime inside the <strong>Roster Manager</strong> tab.
+            <div className="p-3 bg-blue-50/30 dark:bg-blue-950/30 border border-blue-100/50 dark:border-blue-900/50 rounded-xl">
+              <span className="block text-[10px] font-bold text-[#007AFF] dark:text-blue-400 uppercase tracking-wider mb-1">💡 SECURITY RULES NOTICE</span>
+              <p className="text-[10px] text-[#8E8E93] dark:text-gray-400 leading-relaxed font-medium">
+                Admin credentials (PIN: <strong className="text-[#007AFF] dark:text-blue-400">2710</strong>) grant full root command oversight. Staff passcodes can be configured anytime inside the <strong>Roster Manager</strong> tab.
               </p>
             </div>
           </div>
 
           {/* Right: Security Handshake Logs */}
-          <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-150 p-5 shadow-xs space-y-4">
+          <div className="lg:col-span-7 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-150 dark:border-neutral-800 p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-sm font-bold text-[#1D1D1F]">Login Access Audit Trail</h2>
-                <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5">
+                <h2 className="text-sm font-bold text-[#1D1D1F] dark:text-white">Login Access Audit Trail</h2>
+                <p className="text-[11px] text-[#8E8E93] dark:text-gray-400 font-medium mt-0.5">
                   Real-time security logs recording all passcode authentication handshakes.
                 </p>
               </div>
@@ -1220,40 +1220,40 @@ export function AdminTerminal({ onImpersonate, onToast }: AdminTerminalProps) {
                     onToast('Security logs successfully cleared.');
                   }
                 }}
-                className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-extrabold text-[10px] rounded-lg transition cursor-pointer uppercase tracking-wider"
+                className="px-3 py-1.5 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 font-extrabold text-[10px] rounded-lg transition cursor-pointer uppercase tracking-wider"
               >
                 Clear Audit Trail
               </button>
             </div>
 
             {securityLogs.length === 0 ? (
-              <div className="p-12 text-center text-gray-400 border border-dashed border-gray-200 rounded-xl text-xs font-medium">
+              <div className="p-12 text-center text-gray-400 dark:text-gray-500 border border-dashed border-gray-200 dark:border-neutral-800 rounded-xl text-xs font-medium">
                 No security login attempts logged. Start typing passcode on home screen to trigger log reports.
               </div>
             ) : (
-              <div className="border border-gray-100 rounded-xl divide-y divide-gray-100 max-h-[380px] overflow-y-auto scrollbar-thin">
+              <div className="border border-gray-100 dark:border-neutral-800 rounded-xl divide-y divide-gray-100 dark:divide-neutral-800 max-h-[380px] overflow-y-auto scrollbar-thin">
                 {securityLogs.map((log) => (
                   <div key={log.id} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase border ${
                           log.result === 'Success' 
-                            ? 'bg-emerald-50 text-emerald-600 border-emerald-200' 
-                            : 'bg-red-50 text-red-600 border-red-200'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50' 
+                            : 'bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50'
                         }`}>
                           {log.result === 'Success' ? 'GRANTED' : 'DENIED'}
                         </span>
-                        <span className="font-mono text-[9px] text-[#8E8E93] font-semibold">
+                        <span className="font-mono text-[9px] text-[#8E8E93] dark:text-gray-400 font-semibold">
                           PIN INPUT: {log.pinEntered}
                         </span>
                       </div>
                       
-                      <div className="text-gray-700 font-medium text-[11px]">
-                        {log.resolvedUser} <span className="text-gray-400">({log.resolvedRole})</span>
+                      <div className="text-gray-700 dark:text-gray-300 font-medium text-[11px]">
+                        {log.resolvedUser} <span className="text-gray-400 dark:text-gray-500">({log.resolvedRole})</span>
                       </div>
                     </div>
 
-                    <div className="text-left sm:text-right text-[10px] font-mono text-gray-400">
+                    <div className="text-left sm:text-right text-[10px] font-mono text-gray-400 dark:text-gray-500">
                       {new Date(log.timestamp).toLocaleString()}
                     </div>
                   </div>

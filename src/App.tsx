@@ -28,6 +28,7 @@ import { TeamChatDrawer } from './components/TeamChatDrawer';
 import { FirebaseEnclaveInfoModal } from './components/FirebaseEnclaveInfoModal';
 import { SheetsManagerModal } from './components/SheetsManagerModal';
 import { ProfileEditorModal } from './components/ProfileEditorModal';
+import { CalculatorModal } from './components/CalculatorModal';
 import { syncUserDataToFirestore } from './lib/firebaseSync';
 import {
   Sun,
@@ -194,6 +195,7 @@ export default function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isConcludeDayModalOpen, setIsConcludeDayModalOpen] = useState(false);
   const [isNotepadModalOpen, setIsNotepadModalOpen] = useState(false);
+  const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState(false);
   const [lastSyncedTime, setLastSyncedTime] = useState<string>('Just now');
 
   // Core OS Database States (scoped to currentUser)
@@ -999,10 +1001,10 @@ export default function App() {
             </div>
 
             {/* User Profile Indicator & Logout */}
-            <div className="flex items-center gap-2 border-l border-[#E5E5EA] pl-3.5 ml-1">
+            <div className="flex items-center gap-2 border-l border-[#E5E5EA] dark:border-neutral-800 pl-3.5 ml-1">
               <button
                 onClick={() => setIsProfileModalOpen(true)}
-                className="flex items-center gap-2 group cursor-pointer p-1 rounded-xl hover:bg-gray-100 transition"
+                className="flex items-center gap-2 group cursor-pointer p-1 rounded-xl hover:bg-gray-100 dark:hover:bg-neutral-800 transition"
                 title="Click to edit profile, password, and Google ID"
               >
                 <div className={`h-8.5 w-8.5 rounded-xl bg-linear-to-br ${currentUser?.color} text-white font-bold text-xs flex items-center justify-center relative overflow-hidden shrink-0 shadow-xs group-hover:scale-105 transition-transform`}>
@@ -1010,10 +1012,10 @@ export default function App() {
                   <div className="absolute inset-0 bg-linear-to-b from-white/10 to-transparent pointer-events-none" />
                 </div>
                 <div className="hidden lg:block text-left">
-                  <span className="block text-[10px] font-extrabold text-[#1D1D1F] leading-tight truncate max-w-[120px]">
+                  <span className="block text-[10px] font-extrabold text-[#1D1D1F] dark:text-white leading-tight truncate max-w-[120px]">
                     {currentUser?.name}
                   </span>
-                  <span className="block text-[8px] text-[#007AFF] font-bold uppercase tracking-wider flex items-center gap-1">
+                  <span className="block text-[8px] text-[#007AFF] dark:text-blue-400 font-bold uppercase tracking-wider flex items-center gap-1">
                     <span>{currentUser?.role?.toLowerCase().includes('admin') || currentUser?.id === 'admin' ? 'Master Admin' : 'Edit Profile'}</span>
                   </span>
                 </div>
@@ -1099,6 +1101,7 @@ export default function App() {
           }}
           onOpenFirebaseInfo={() => setIsFirebaseModalOpen(true)}
           onOpenNotepad={() => setIsNotepadModalOpen(true)}
+          onOpenCalculator={() => setIsCalculatorModalOpen(true)}
           activePage={activePage}
           onSelectPage={setActivePage}
           isAdmin={!!(authenticatedUser.id === 'admin' || authenticatedUser.role?.toLowerCase().includes('admin') || authenticatedUser.role?.toLowerCase().includes('director'))}
@@ -1230,17 +1233,17 @@ export default function App() {
 
             {/* Embedded Executive Scratchpad / Notepad */}
             <div className="bg-[#FFFDEB]/90 dark:bg-[#2C2B1E] p-5 rounded-2xl border border-[#EBE3C5] dark:border-[#4A472E] shadow-xs">
-              <div className="flex items-center justify-between pb-2 border-b border-[#EBE3C5]/60 mb-2">
-                <h3 className="text-xs font-bold uppercase text-[#857342] tracking-wider flex items-center gap-1.5">
+              <div className="flex items-center justify-between pb-2 border-b border-[#EBE3C5]/60 dark:border-[#4A472E] mb-2">
+                <h3 className="text-xs font-bold uppercase text-[#857342] dark:text-amber-300 tracking-wider flex items-center gap-1.5">
                   <span className="text-sm">✍️</span> Executive Yellow Pad (Business Memory Notepad)
                 </h3>
-                <span className="text-[9px] text-[#A69460] font-bold font-mono">AUTOSAVED</span>
+                <span className="text-[9px] text-[#A69460] dark:text-amber-400 font-bold font-mono">AUTOSAVED</span>
               </div>
               <textarea
                 value={masterNotes}
                 onChange={(e) => setMasterNotes(e.target.value)}
                 placeholder="Scribble quick notes, client phone numbers, agendas, or design dimensions here..."
-                className="w-full min-h-[140px] bg-transparent text-xs text-[#423D2B] leading-relaxed focus:outline-hidden font-medium placeholder-[#B8AD8A] resize-none"
+                className="w-full min-h-[140px] bg-transparent text-xs text-[#423D2B] dark:text-amber-100 leading-relaxed focus:outline-hidden font-semibold placeholder-[#B8AD8A] dark:placeholder-amber-400/60 resize-none"
               />
             </div>
 
@@ -1582,6 +1585,13 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Calculator Modal */}
+      <CalculatorModal
+        isOpen={isCalculatorModalOpen}
+        onClose={() => setIsCalculatorModalOpen(false)}
+        onToast={showToast}
+      />
     </div>
   );
 }

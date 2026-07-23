@@ -18,6 +18,7 @@ import {
   Database,
   Sparkles,
   Crown,
+  Calculator,
 } from 'lucide-react';
 
 interface WorkspaceEnginesBarProps {
@@ -33,6 +34,7 @@ interface WorkspaceEnginesBarProps {
   onOpenTasks?: () => void;
   onOpenFirebaseInfo: () => void;
   onOpenNotepad?: () => void;
+  onOpenCalculator?: () => void;
   activePage?: string;
   onSelectPage?: (page: 'master' | 'contacts' | 'calendar' | 'history' | 'admin-deck') => void;
   isAdmin?: boolean;
@@ -51,6 +53,7 @@ export function WorkspaceEnginesBar({
   onOpenTasks,
   onOpenFirebaseInfo,
   onOpenNotepad,
+  onOpenCalculator,
   activePage = 'master',
   onSelectPage,
   isAdmin = false,
@@ -176,6 +179,17 @@ export function WorkspaceEnginesBar({
               <FileText className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               Notepad
             </button>
+
+            {onOpenCalculator && (
+              <button
+                onClick={onOpenCalculator}
+                className="px-3 py-1 rounded-lg text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1 bg-blue-500/10 text-blue-800 dark:text-blue-300 hover:bg-blue-500/20 border border-blue-500/30"
+                title="Open Executive Calculator & History"
+              >
+                <Calculator className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                Calculator
+              </button>
+            )}
 
             {isAdmin && (
               <button
